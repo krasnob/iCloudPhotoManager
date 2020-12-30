@@ -1,0 +1,701 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D98AF4CE259C473D00BA1153 /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4CD259C473D00BA1153 /* Tests_iOS.swift */; };
+		D98AF4D9259C473D00BA1153 /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4D8259C473D00BA1153 /* Tests_macOS.swift */; };
+		D98AF4DB259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */; };
+		D98AF4DC259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */; };
+		D98AF4DD259C473D00BA1153 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4B3259C473C00BA1153 /* ContentView.swift */; };
+		D98AF4DE259C473D00BA1153 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4B3259C473C00BA1153 /* ContentView.swift */; };
+		D98AF4DF259C473D00BA1153 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D98AF4B4259C473C00BA1153 /* Assets.xcassets */; };
+		D98AF4E0259C473D00BA1153 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D98AF4B4259C473C00BA1153 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D98AF4CA259C473D00BA1153 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D98AF4AD259C473B00BA1153 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D98AF4B8259C473C00BA1153;
+			remoteInfo = "iCloudPhotoManager (iOS)";
+		};
+		D98AF4D5259C473D00BA1153 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D98AF4AD259C473B00BA1153 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D98AF4C0259C473C00BA1153;
+			remoteInfo = "iCloudPhotoManager (macOS)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudPhotoManagerApp.swift; sourceTree = "<group>"; };
+		D98AF4B3259C473C00BA1153 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D98AF4B4259C473C00BA1153 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D98AF4B9259C473C00BA1153 /* iCloudPhotoManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iCloudPhotoManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D98AF4BC259C473C00BA1153 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D98AF4C1259C473C00BA1153 /* iCloudPhotoManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iCloudPhotoManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D98AF4C3259C473C00BA1153 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D98AF4C4259C473C00BA1153 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		D98AF4C9259C473D00BA1153 /* Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D98AF4CD259C473D00BA1153 /* Tests_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_iOS.swift; sourceTree = "<group>"; };
+		D98AF4CF259C473D00BA1153 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D98AF4D4259C473D00BA1153 /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D98AF4D8259C473D00BA1153 /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
+		D98AF4DA259C473D00BA1153 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D98AF4B6259C473C00BA1153 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4BE259C473C00BA1153 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4C6259C473D00BA1153 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4D1259C473D00BA1153 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D98AF4AC259C473B00BA1153 = {
+			isa = PBXGroup;
+			children = (
+				D98AF4B1259C473C00BA1153 /* Shared */,
+				D98AF4BB259C473C00BA1153 /* iOS */,
+				D98AF4C2259C473C00BA1153 /* macOS */,
+				D98AF4CC259C473D00BA1153 /* Tests iOS */,
+				D98AF4D7259C473D00BA1153 /* Tests macOS */,
+				D98AF4BA259C473C00BA1153 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D98AF4B1259C473C00BA1153 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */,
+				D98AF4B3259C473C00BA1153 /* ContentView.swift */,
+				D98AF4B4259C473C00BA1153 /* Assets.xcassets */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D98AF4BA259C473C00BA1153 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D98AF4B9259C473C00BA1153 /* iCloudPhotoManager.app */,
+				D98AF4C1259C473C00BA1153 /* iCloudPhotoManager.app */,
+				D98AF4C9259C473D00BA1153 /* Tests iOS.xctest */,
+				D98AF4D4259C473D00BA1153 /* Tests macOS.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D98AF4BB259C473C00BA1153 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				D98AF4BC259C473C00BA1153 /* Info.plist */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		D98AF4C2259C473C00BA1153 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				D98AF4C3259C473C00BA1153 /* Info.plist */,
+				D98AF4C4259C473C00BA1153 /* macOS.entitlements */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		D98AF4CC259C473D00BA1153 /* Tests iOS */ = {
+			isa = PBXGroup;
+			children = (
+				D98AF4CD259C473D00BA1153 /* Tests_iOS.swift */,
+				D98AF4CF259C473D00BA1153 /* Info.plist */,
+			);
+			path = "Tests iOS";
+			sourceTree = "<group>";
+		};
+		D98AF4D7259C473D00BA1153 /* Tests macOS */ = {
+			isa = PBXGroup;
+			children = (
+				D98AF4D8259C473D00BA1153 /* Tests_macOS.swift */,
+				D98AF4DA259C473D00BA1153 /* Info.plist */,
+			);
+			path = "Tests macOS";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D98AF4B8259C473C00BA1153 /* iCloudPhotoManager (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D98AF4E3259C473D00BA1153 /* Build configuration list for PBXNativeTarget "iCloudPhotoManager (iOS)" */;
+			buildPhases = (
+				D98AF4B5259C473C00BA1153 /* Sources */,
+				D98AF4B6259C473C00BA1153 /* Frameworks */,
+				D98AF4B7259C473C00BA1153 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "iCloudPhotoManager (iOS)";
+			productName = "iCloudPhotoManager (iOS)";
+			productReference = D98AF4B9259C473C00BA1153 /* iCloudPhotoManager.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D98AF4C0259C473C00BA1153 /* iCloudPhotoManager (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D98AF4E6259C473D00BA1153 /* Build configuration list for PBXNativeTarget "iCloudPhotoManager (macOS)" */;
+			buildPhases = (
+				D98AF4BD259C473C00BA1153 /* Sources */,
+				D98AF4BE259C473C00BA1153 /* Frameworks */,
+				D98AF4BF259C473C00BA1153 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "iCloudPhotoManager (macOS)";
+			productName = "iCloudPhotoManager (macOS)";
+			productReference = D98AF4C1259C473C00BA1153 /* iCloudPhotoManager.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D98AF4C8259C473D00BA1153 /* Tests iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D98AF4E9259C473D00BA1153 /* Build configuration list for PBXNativeTarget "Tests iOS" */;
+			buildPhases = (
+				D98AF4C5259C473D00BA1153 /* Sources */,
+				D98AF4C6259C473D00BA1153 /* Frameworks */,
+				D98AF4C7259C473D00BA1153 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D98AF4CB259C473D00BA1153 /* PBXTargetDependency */,
+			);
+			name = "Tests iOS";
+			productName = "Tests iOS";
+			productReference = D98AF4C9259C473D00BA1153 /* Tests iOS.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D98AF4D3259C473D00BA1153 /* Tests macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D98AF4EC259C473D00BA1153 /* Build configuration list for PBXNativeTarget "Tests macOS" */;
+			buildPhases = (
+				D98AF4D0259C473D00BA1153 /* Sources */,
+				D98AF4D1259C473D00BA1153 /* Frameworks */,
+				D98AF4D2259C473D00BA1153 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D98AF4D6259C473D00BA1153 /* PBXTargetDependency */,
+			);
+			name = "Tests macOS";
+			productName = "Tests macOS";
+			productReference = D98AF4D4259C473D00BA1153 /* Tests macOS.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D98AF4AD259C473B00BA1153 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1230;
+				LastUpgradeCheck = 1230;
+				TargetAttributes = {
+					D98AF4B8259C473C00BA1153 = {
+						CreatedOnToolsVersion = 12.3;
+					};
+					D98AF4C0259C473C00BA1153 = {
+						CreatedOnToolsVersion = 12.3;
+					};
+					D98AF4C8259C473D00BA1153 = {
+						CreatedOnToolsVersion = 12.3;
+						TestTargetID = D98AF4B8259C473C00BA1153;
+					};
+					D98AF4D3259C473D00BA1153 = {
+						CreatedOnToolsVersion = 12.3;
+						TestTargetID = D98AF4C0259C473C00BA1153;
+					};
+				};
+			};
+			buildConfigurationList = D98AF4B0259C473B00BA1153 /* Build configuration list for PBXProject "iCloudPhotoManager" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D98AF4AC259C473B00BA1153;
+			productRefGroup = D98AF4BA259C473C00BA1153 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D98AF4B8259C473C00BA1153 /* iCloudPhotoManager (iOS) */,
+				D98AF4C0259C473C00BA1153 /* iCloudPhotoManager (macOS) */,
+				D98AF4C8259C473D00BA1153 /* Tests iOS */,
+				D98AF4D3259C473D00BA1153 /* Tests macOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D98AF4B7259C473C00BA1153 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D98AF4DF259C473D00BA1153 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4BF259C473C00BA1153 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D98AF4E0259C473D00BA1153 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4C7259C473D00BA1153 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4D2259C473D00BA1153 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D98AF4B5259C473C00BA1153 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D98AF4DD259C473D00BA1153 /* ContentView.swift in Sources */,
+				D98AF4DB259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4BD259C473C00BA1153 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D98AF4DE259C473D00BA1153 /* ContentView.swift in Sources */,
+				D98AF4DC259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4C5259C473D00BA1153 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D98AF4CE259C473D00BA1153 /* Tests_iOS.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D98AF4D0259C473D00BA1153 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D98AF4D9259C473D00BA1153 /* Tests_macOS.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D98AF4CB259C473D00BA1153 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D98AF4B8259C473C00BA1153 /* iCloudPhotoManager (iOS) */;
+			targetProxy = D98AF4CA259C473D00BA1153 /* PBXContainerItemProxy */;
+		};
+		D98AF4D6259C473D00BA1153 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D98AF4C0259C473C00BA1153 /* iCloudPhotoManager (macOS) */;
+			targetProxy = D98AF4D5259C473D00BA1153 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D98AF4E1259C473D00BA1153 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D98AF4E2259C473D00BA1153 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		D98AF4E4259C473D00BA1153 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = us.sellpo.iCloudPhotoManager;
+				PRODUCT_NAME = iCloudPhotoManager;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D98AF4E5259C473D00BA1153 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = us.sellpo.iCloudPhotoManager;
+				PRODUCT_NAME = iCloudPhotoManager;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D98AF4E7259C473D00BA1153 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = us.sellpo.iCloudPhotoManager;
+				PRODUCT_NAME = iCloudPhotoManager;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D98AF4E8259C473D00BA1153 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = us.sellpo.iCloudPhotoManager;
+				PRODUCT_NAME = iCloudPhotoManager;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D98AF4EA259C473D00BA1153 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				INFOPLIST_FILE = "Tests iOS/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "us.sellpo.Tests-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "iCloudPhotoManager (iOS)";
+			};
+			name = Debug;
+		};
+		D98AF4EB259C473D00BA1153 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				INFOPLIST_FILE = "Tests iOS/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "us.sellpo.Tests-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "iCloudPhotoManager (iOS)";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D98AF4ED259C473D00BA1153 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				INFOPLIST_FILE = "Tests macOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "us.sellpo.Tests-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "iCloudPhotoManager (macOS)";
+			};
+			name = Debug;
+		};
+		D98AF4EE259C473D00BA1153 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = C79HK45MA3;
+				INFOPLIST_FILE = "Tests macOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "us.sellpo.Tests-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "iCloudPhotoManager (macOS)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D98AF4B0259C473B00BA1153 /* Build configuration list for PBXProject "iCloudPhotoManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D98AF4E1259C473D00BA1153 /* Debug */,
+				D98AF4E2259C473D00BA1153 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D98AF4E3259C473D00BA1153 /* Build configuration list for PBXNativeTarget "iCloudPhotoManager (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D98AF4E4259C473D00BA1153 /* Debug */,
+				D98AF4E5259C473D00BA1153 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D98AF4E6259C473D00BA1153 /* Build configuration list for PBXNativeTarget "iCloudPhotoManager (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D98AF4E7259C473D00BA1153 /* Debug */,
+				D98AF4E8259C473D00BA1153 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D98AF4E9259C473D00BA1153 /* Build configuration list for PBXNativeTarget "Tests iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D98AF4EA259C473D00BA1153 /* Debug */,
+				D98AF4EB259C473D00BA1153 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D98AF4EC259C473D00BA1153 /* Build configuration list for PBXNativeTarget "Tests macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D98AF4ED259C473D00BA1153 /* Debug */,
+				D98AF4EE259C473D00BA1153 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D98AF4AD259C473B00BA1153 /* Project object */;
+}
