@@ -15,6 +15,8 @@
 		D98AF4DE259C473D00BA1153 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4B3259C473C00BA1153 /* ContentView.swift */; };
 		D98AF4DF259C473D00BA1153 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D98AF4B4259C473C00BA1153 /* Assets.xcassets */; };
 		D98AF4E0259C473D00BA1153 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D98AF4B4259C473C00BA1153 /* Assets.xcassets */; };
+		D9C0C2AF259C4B1D00347E58 /* PhotoLibManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0C2AE259C4B1D00347E58 /* PhotoLibManagement.swift */; };
+		D9C0C2B0259C4B1D00347E58 /* PhotoLibManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C0C2AE259C4B1D00347E58 /* PhotoLibManagement.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,7 @@
 		D98AF4D4259C473D00BA1153 /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D98AF4D8259C473D00BA1153 /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
 		D98AF4DA259C473D00BA1153 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D9C0C2AE259C4B1D00347E58 /* PhotoLibManagement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoLibManagement.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +101,7 @@
 		D98AF4B1259C473C00BA1153 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				D9C0C2AE259C4B1D00347E58 /* PhotoLibManagement.swift */,
 				D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */,
 				D98AF4B3259C473C00BA1153 /* ContentView.swift */,
 				D98AF4B4259C473C00BA1153 /* Assets.xcassets */,
@@ -308,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9C0C2AF259C4B1D00347E58 /* PhotoLibManagement.swift in Sources */,
 				D98AF4DD259C473D00BA1153 /* ContentView.swift in Sources */,
 				D98AF4DB259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */,
 			);
@@ -317,6 +322,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9C0C2B0259C4B1D00347E58 /* PhotoLibManagement.swift in Sources */,
 				D98AF4DE259C473D00BA1153 /* ContentView.swift in Sources */,
 				D98AF4DC259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */,
 			);
