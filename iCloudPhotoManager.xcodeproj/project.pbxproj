@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D95BD1A225A02E75002D0BD4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95BD1A125A02E75002D0BD4 /* SettingsView.swift */; };
+		D95BD1A325A02E75002D0BD4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95BD1A125A02E75002D0BD4 /* SettingsView.swift */; };
+		D95BD1A425A02E75002D0BD4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95BD1A125A02E75002D0BD4 /* SettingsView.swift */; };
+		D95BD1A525A02E75002D0BD4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95BD1A125A02E75002D0BD4 /* SettingsView.swift */; };
 		D98AF4CE259C473D00BA1153 /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4CD259C473D00BA1153 /* Tests_iOS.swift */; };
 		D98AF4D9259C473D00BA1153 /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4D8259C473D00BA1153 /* Tests_macOS.swift */; };
 		D98AF4DB259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */; };
@@ -37,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D95BD1A125A02E75002D0BD4 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudPhotoManagerApp.swift; sourceTree = "<group>"; };
 		D98AF4B3259C473C00BA1153 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D98AF4B4259C473C00BA1153 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -104,6 +109,7 @@
 				D9C0C2AE259C4B1D00347E58 /* PhotoLibManagement.swift */,
 				D98AF4B2259C473C00BA1153 /* iCloudPhotoManagerApp.swift */,
 				D98AF4B3259C473C00BA1153 /* ContentView.swift */,
+				D95BD1A125A02E75002D0BD4 /* SettingsView.swift */,
 				D98AF4B4259C473C00BA1153 /* Assets.xcassets */,
 			);
 			path = Shared;
@@ -313,6 +319,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9C0C2AF259C4B1D00347E58 /* PhotoLibManagement.swift in Sources */,
+				D95BD1A225A02E75002D0BD4 /* SettingsView.swift in Sources */,
 				D98AF4DD259C473D00BA1153 /* ContentView.swift in Sources */,
 				D98AF4DB259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */,
 			);
@@ -323,6 +330,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9C0C2B0259C4B1D00347E58 /* PhotoLibManagement.swift in Sources */,
+				D95BD1A325A02E75002D0BD4 /* SettingsView.swift in Sources */,
 				D98AF4DE259C473D00BA1153 /* ContentView.swift in Sources */,
 				D98AF4DC259C473D00BA1153 /* iCloudPhotoManagerApp.swift in Sources */,
 			);
@@ -333,6 +341,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D98AF4CE259C473D00BA1153 /* Tests_iOS.swift in Sources */,
+				D95BD1A425A02E75002D0BD4 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +350,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D98AF4D9259C473D00BA1153 /* Tests_macOS.swift in Sources */,
+				D95BD1A525A02E75002D0BD4 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

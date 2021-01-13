@@ -13,6 +13,11 @@ class ViewModel: ObservableObject {
 
 struct ContentView: View {
   @ObservedObject public var viewModel: ViewModel = ViewModel()
+  @Binding var selectedTab: Int
+  init(selectedTab: Binding<Int>) {
+    self._selectedTab = selectedTab
+    AppState.shared.contentView = self
+  }
   var body: some View {
     VStack(alignment: .center) {
       Text("Hello, World!")
@@ -41,15 +46,21 @@ struct ContentView: View {
       }
       Text(self.viewModel.testText)
         .frame(maxWidth: .infinity, maxHeight: 100)
-      //NSTableView()
+      Button(action: {
+        self.selectedTab = 1
+        //AppState.shared.tabBarAppearance.barTintColor = UIColor.green
+        //AppState.shared.tabBar.isHidden = false
+      }) {
+        Text("Switch")
+      }
+      //NSTableView()r
     }
   }
 }
 
-
 struct ContentView_Previews: PreviewProvider {
+  @State static var selectedTab = 1
   static var previews: some View {
-    ContentView()
+    ContentView(selectedTab: $selectedTab)
   }
 }
-
