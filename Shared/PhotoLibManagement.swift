@@ -8,6 +8,9 @@
 import Foundation
 #if !os(iOS)
 import Cocoa
+typealias UIImage = NSImage
+#else
+import UIKit
 #endif
 import Photos
 
@@ -28,6 +31,30 @@ class PhotoLibManagement {
   
   public func getAllMedia(sortBy: Sort) {
     self.requestAuthorization()
+  }
+  
+  public func mediaCount() -> Int {
+    return self.assetTuplesArray.count
+  }
+  
+  public func getThumbnail(forIndex index: Int, targetSize: CGSize, withImageLoader imageLoader: ImageLoaderModel) {
+    DispatchQueue.global(qos: .background).async {
+      if (index >= self.mediaCount()) {
+        return
+      }
+      let asset = self.assetTuplesArray[index].asset
+      let requestOptions = PHImageRequestOptions()
+      requestOptions.isNetworkAccessAllowed = true
+      requestOptions.version = PHImageRequestOptionsVersion.original
+      requestOptions.deliveryMode = .fastFormat
+      PHImageManager.default().requestImage(
+        for: asset, targetSize: targetSize, contentMode: .default, options: requestOptions, resultHandler:
+          { (image: UIImage?, info: [AnyHashable : Any]?) in
+            print("index: \(index)")
+            imageLoader.uiImage = image
+          }
+      )
+    }
   }
   
   public func downloadMedia() {

@@ -11,10 +11,40 @@ class ViewModel: ObservableObject {
   @Published public var testText = "Hello"
 }
 
+class ImageLoaderModel: ObservableObject {
+  @Published public var uiImage: UIImage?
+}
+
+struct SampleRow: View {
+  let idx: Int
+  let parent: Any
+  @ObservedObject public var imageLoaderModel = ImageLoaderModel()
+  
+  var body: some View {
+    if let uiImage = imageLoaderModel.uiImage {
+#if os(macOS)
+      Image(nsImage: uiImage).resizable()
+        .scaledToFit()
+#else
+      Image(uiImage: uiImage).resizable()
+        .scaledToFit()
+#endif
+    } else {
+      Text("Row \(idx)").background(Color.blue)
+    }
+  }
+  
+  init(idx: Int, parent: Any) {
+    print("Loading row \(idx)")
+    self.parent = parent
+    self.idx = idx
+    PhotoLibManagement.sharedInstance().getThumbnail(forIndex: idx, targetSize: CGSize.zero, withImageLoader: imageLoaderModel)
+  }
+}
+
 struct ContentView: View {
   @ObservedObject public var viewModel: ViewModel = ViewModel()
   @Binding var selectedTab: Int
-  let data = (1...1000).map { "Item \($0)" }
   
   let columns = [
     GridItem(.adaptive(minimum: 80))
@@ -60,8 +90,9 @@ struct ContentView: View {
       }
       ScrollView {
         LazyVGrid(columns: columns, spacing: 20) {
-          ForEach(data, id: \.self) { item in
-            Text(item)
+          ForEach(0 ..< PhotoLibManagement.sharedInstance().mediaCount(), id: \.self) { idx in
+            SampleRow(idx: idx, parent: self)
+            
           }
         }
         .padding(.horizontal)
