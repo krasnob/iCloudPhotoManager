@@ -14,6 +14,11 @@ class ViewModel: ObservableObject {
 struct ContentView: View {
   @ObservedObject public var viewModel: ViewModel = ViewModel()
   @Binding var selectedTab: Int
+  let data = (1...1000).map { "Item \($0)" }
+  
+  let columns = [
+    GridItem(.adaptive(minimum: 80))
+  ]
   init(selectedTab: Binding<Int>) {
     self._selectedTab = selectedTab
     AppState.shared.contentView = self
@@ -25,7 +30,7 @@ struct ContentView: View {
       Button(action: {
         //self.testText = "Hi"
         print("Here")
-         PhotoLibManagement.sharedInstance().getAllMedia(sortBy: .Size)
+        PhotoLibManagement.sharedInstance().getAllMedia(sortBy: .Size)
         
       }) {
         Text("Tap Here")
@@ -33,13 +38,13 @@ struct ContentView: View {
       Button(action: {
         //self.testText = "Hi"
         print("Here")
-         PhotoLibManagement.sharedInstance().downloadMedia()
+        PhotoLibManagement.sharedInstance().downloadMedia()
         
       }) {
         Text("Download")
       }
       Button(action: {
-         PhotoLibManagement.sharedInstance().deleteMediaWithIndex(0)
+        PhotoLibManagement.sharedInstance().deleteMediaWithIndex(0)
         
       }) {
         Text("Delete")
@@ -53,6 +58,17 @@ struct ContentView: View {
       }) {
         Text("Switch")
       }
+      ScrollView {
+        LazyVGrid(columns: columns, spacing: 20) {
+          ForEach(data, id: \.self) { item in
+            Text(item)
+          }
+        }
+        .padding(.horizontal)
+      }
+      /*ForEach((1...10).reversed(), id: \.self) {
+       Text("\($0)…")
+       }*/
       //NSTableView()r
     }
   }
