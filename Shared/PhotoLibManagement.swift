@@ -14,6 +14,9 @@ import UIKit
 #endif
 import Photos
 
+typealias AssetTuple = (asset: PHAsset, resources: [PHAssetResource])
+typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID)
+
 class PhotoLibManagement {
   enum Sort {
     case Size
@@ -21,7 +24,8 @@ class PhotoLibManagement {
   private static let instance = PhotoLibManagement()
   
   private var authorizationStatus = PHAuthorizationStatus.notDetermined
-  private var assetTuplesArray: Array<(asset: PHAsset, resources: [PHAssetResource])> = []
+  private var assetTuplesArray: Array<AssetTuple> = []
+  private var imageCacheTuplesArray: Array<ImageCacheTuple> = []
   
   // MARK: - Public Methods
   
@@ -38,20 +42,33 @@ class PhotoLibManagement {
   }
   
   public func getThumbnail(forIndex index: Int, targetSize: CGSize, withImageLoader imageLoader: ImageLoaderModel) {
+    if (index >= self.mediaCount()) {
+      return
+    }
+    PHImageManager.default().cancelImageRequest(self.imageCacheTuplesArray[index].imageRequestId)
+    let resource = self.assetTuplesArray[index].resources[0]
+    imageLoader.fileName = resource.originalFilename
+    imageLoader.fileSize = "\(resource.value(forKey: "fileSize") as? Int ?? 0)"
+    if let cachedImage = self.imageCacheTuplesArray[index].image {
+      imageLoader.uiImage = cachedImage
+    }
     DispatchQueue.global(qos: .background).async {
-      if (index >= self.mediaCount()) {
-        return
-      }
       let asset = self.assetTuplesArray[index].asset
       let requestOptions = PHImageRequestOptions()
       requestOptions.isNetworkAccessAllowed = true
       requestOptions.version = PHImageRequestOptionsVersion.original
-      requestOptions.deliveryMode = .fastFormat
-      PHImageManager.default().requestImage(
+      requestOptions.deliveryMode = .highQualityFormat
+      self.imageCacheTuplesArray[index].imageRequestId = PHImageManager.default().requestImage(
         for: asset, targetSize: targetSize, contentMode: .default, options: requestOptions, resultHandler:
           { (image: UIImage?, info: [AnyHashable : Any]?) in
             print("index: \(index)")
-            imageLoader.uiImage = image
+            if let requestedImage = image {
+              self.imageCacheTuplesArray[index].image = requestedImage
+              
+              DispatchQueue.main.async {
+                imageLoader.uiImage = requestedImage
+              }
+            }
           }
       )
     }
@@ -265,6 +282,8 @@ class PhotoLibManagement {
   }
   
   private func populateMedia() {
+    self.assetTuplesArray.removeAll()
+    self.imageCacheTuplesArray.removeAll()
     let fetchResult: PHFetchResult = PHAsset.fetchAssets(with: fetchOptions())
     // var assetTuplesArray: Array<(asset: PHAsset, resources: [PHAssetResource])> = []
     fetchResult.enumerateObjects { (asset: PHAsset, index: Int, stop: UnsafeMutablePointer<ObjCBool>) in
@@ -273,15 +292,12 @@ class PhotoLibManagement {
       if assetTuple.resources[0].originalFilename == "4f1fd31d858d39c7787d759671933f25.mov" {
         print("hhh")
       }
-      if self.assetTuplesArray.count > 0,
-         self.assetTuple(assetTuple, hasGreaterFileSizeThanExistingAssetTuple: self.assetTuplesArray.first!) {
-        self.assetTuplesArray.insert(assetTuple, at: 0)
-        //if resource.count > 0,
-        //     let imageSizeByte = resource.first?.value(forKey: "fileSize") as? Float ?? 0)
-      } else {
-        self.assetTuplesArray.append(assetTuple)
-      }
+      self.assetTuplesArray.append(assetTuple)
     }
+    self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
+      return assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
+    }
+    self.imageCacheTuplesArray = Array(repeating: (image: nil, imageRequestId: PHInvalidImageRequestID), count: self.assetTuplesArray.count)
     AppState.shared.contentView?.viewModel.testText = "Done"
   }
   
