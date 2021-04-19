@@ -22,23 +22,67 @@ class ImageLoaderModel: ObservableObject {
   //@Published public var
 }
 
+public class MyFilePromiseProvider : NSFilePromiseProvider {
+    
+}
+
+class DraggableImageView: NSImageView, NSDraggingSource, NSPasteboardItemDataProvider, NSFilePromiseProviderDelegate, NSPasteboardWriting {
+  func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
+    return  [kUTTypeData as NSPasteboard.PasteboardType]
+  }
+  
+  func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
+    [kUTTypeData as NSPasteboard.PasteboardType]
+  }
+  
+  func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, fileNameForType fileType: String) -> String {
+    return "hello.txt"
+  }
+  
+  func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
+    return
+  }
+  
+  
+  
+  func pasteboard(_ pasteboard: NSPasteboard?, item: NSPasteboardItem, provideDataForType type: NSPasteboard.PasteboardType) {
+    return
+  }
+  
+  func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+    return .copy
+  }
+  
+  override func mouseDown(with theEvent: NSEvent) {
+    //1.
+    let pasteboardItem = NSFilePromiseProvider(fileType: kUTTypeData as String, delegate: self)
+    
+    //2.
+    let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
+    draggingItem.setDraggingFrame(self.bounds, contents:self.image)
+    
+    //3.
+    beginDraggingSession(with: [draggingItem], event: theEvent, source: self)
+  }
+}
+
 
 struct CellImageView: NSViewRepresentable {
   var image: NSImage
   var width: CGFloat
-    
-  func makeNSView(context: Context) -> NSImageView {
-    let imageView = NSImageView()
+  
+  func makeNSView(context: Context) -> DraggableImageView {
+    let imageView = DraggableImageView()
     resizeImage(imageView)
     return imageView
   }
   
   
-  func updateNSView(_ uiView: NSImageView, context: Context) {
+  func updateNSView(_ uiView: DraggableImageView, context: Context) {
     resizeImage(uiView)
   }
   
-  func resizeImage(_ imageView: NSImageView) {
+  func resizeImage(_ imageView: DraggableImageView) {
     let aspectRatio = self.image.size.height / self.image.size.width
     self.image.size.width = width
     self.image.size.height = width * aspectRatio
@@ -66,7 +110,7 @@ struct SampleRow: View {
       } else {
         Text("Row \(idx)").background(Color.blue)
       }
-    }.onDrag { return NSItemProvider(object: NSURL(string: "http://google.com") as! NSItemProviderWriting) }
+    }
   }
   
   init(idx: Int, parent: Any, width: CGFloat) {
@@ -87,15 +131,18 @@ struct ContentView: View {
   }
   var body: some View {
     VStack(alignment: .center) {
-      Button(action: {
-        self.viewModel.cellMinimumWidth -= 10
-      }) {
-        Text("-")
-      }
-      Button(action: {
-        self.viewModel.cellMinimumWidth += 10
-      }) {
-        Text("+")
+      HStack(alignment: .center) {
+        Button(action: {
+          self.viewModel.cellMinimumWidth -= 10
+        }) {
+          Text("-")
+        }
+        
+        Button(action: {
+          self.viewModel.cellMinimumWidth += 10
+        }) {
+          Text("+")
+        }
       }
       Button(action: {
         //self.testText = "Hi"
@@ -105,6 +152,7 @@ struct ContentView: View {
       }) {
         Text("Tap Here")
       }
+      
       Button(action: {
         //self.testText = "Hi"
         print("Here")
