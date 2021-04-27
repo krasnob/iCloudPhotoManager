@@ -22,47 +22,35 @@ class ImageLoaderModel: ObservableObject {
   //@Published public var
 }
 
-public class MyFilePromiseProvider : NSFilePromiseProvider {
-    
-}
-
-class DraggableImageView: NSImageView, NSDraggingSource, NSPasteboardItemDataProvider, NSFilePromiseProviderDelegate, NSPasteboardWriting {
-  func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
-    return  [kUTTypeData as NSPasteboard.PasteboardType]
-  }
-  
-  func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
-    [kUTTypeData as NSPasteboard.PasteboardType]
-  }
+class DraggableImageView: NSImageView, NSDraggingSource, NSFilePromiseProviderDelegate {
+  var idx: Int?
   
   func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, fileNameForType fileType: String) -> String {
-    return "hello.txt"
+    return PhotoLibManagement.sharedInstance().getFileOrFolderNameFor(index: self.idx ?? -1)
   }
   
   func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
+    PhotoLibManagement.sharedInstance().saveAssetWithIndex(self.idx ?? -1, toUrl: url, withCompletionhandler: completionHandler)
     return
   }
   
-  
-  
-  func pasteboard(_ pasteboard: NSPasteboard?, item: NSPasteboardItem, provideDataForType type: NSPasteboard.PasteboardType) {
-    return
-  }
-  
+
   func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
     return .copy
   }
   
   override func mouseDown(with theEvent: NSEvent) {
+    guard let image = self.image else { return }
     //1.
-    let pasteboardItem = NSFilePromiseProvider(fileType: kUTTypeData as String, delegate: self)
+    let filePromiseWriter = NSFilePromiseProvider(fileType: kUTTypeData as String, delegate: self)
     
     //2.
-    let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
-    draggingItem.setDraggingFrame(self.bounds, contents:self.image)
+    let draggingItem = NSDraggingItem(pasteboardWriter: filePromiseWriter)
+    draggingItem.setDraggingFrame(CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height), contents: image)
     
     //3.
-    beginDraggingSession(with: [draggingItem], event: theEvent, source: self)
+    let draggingSession = beginDraggingSession(with: [draggingItem], event: theEvent, source: self)
+    draggingSession.draggingFormation = .pile
   }
 }
 
@@ -70,9 +58,11 @@ class DraggableImageView: NSImageView, NSDraggingSource, NSPasteboardItemDataPro
 struct CellImageView: NSViewRepresentable {
   var image: NSImage
   var width: CGFloat
+  var idx: Int
   
   func makeNSView(context: Context) -> DraggableImageView {
     let imageView = DraggableImageView()
+    imageView.idx = self.idx
     resizeImage(imageView)
     return imageView
   }
@@ -101,7 +91,7 @@ struct SampleRow: View {
     VStack(alignment: .center) {
       if let uiImage = imageLoaderModel.uiImage {
         #if os(macOS)
-        CellImageView(image: uiImage, width: self.width)//.resizable()
+        CellImageView(image: uiImage, width: self.width, idx: self.idx)
         #else
         Image(uiImage: uiImage).resizable()
           .scaledToFit()

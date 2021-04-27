@@ -74,6 +74,73 @@ class PhotoLibManagement {
     }
   }
   
+  public func saveAssetWithIndex(_ index: Int, toUrl url: URL, withCompletionhandler completionHandler: @escaping (Error?) -> Void) {
+    if (index >= self.mediaCount() || index < 0) {
+      completionHandler(NSError(domain:"", code:2, userInfo:[ NSLocalizedDescriptionKey: "No asset with the index \(index) found in the photo library"]))
+      return
+    }
+    
+    let asset = self.assetTuplesArray[index].asset
+    let resources = self.assetTuplesArray[index].resources
+    if resources.count == 1 {
+      self.saveAssetResource(resources[0], fileNameUrl: url) {(error) -> Void in
+        
+      }
+    }
+    
+    if (resources.count > 1) {
+      // Create folder first
+      do {
+        try FileManager.init().createDirectory(at: url, withIntermediateDirectories: false, attributes: nil)
+      } catch {
+        completionHandler(error)
+        return
+      }
+    }
+    let assetRequestOptions = PHAssetResourceRequestOptions()
+    assetRequestOptions.isNetworkAccessAllowed = true
+    for resource in resources {
+      let dateTimeString = self.dateStringFrom(asset.creationDate)
+      let fileName = "\(url.absoluteString)/\(dateTimeString)_\(resource.originalFilename)"
+      if let fileNameUrl = URL(string: fileName) {
+        self.saveAssetResource(resource, fileNameUrl: fileNameUrl) { (error) in
+          print("Saved resource directly \(resource) to filepath \(fileNameUrl)")
+        }
+      } else {
+        let errorString = "Error converting '\(fileName)' to URL"
+        print(errorString)
+        completionHandler(NSError(domain:"", code:3, userInfo:[ NSLocalizedDescriptionKey: errorString]))
+      }
+    }
+  }
+  
+  public func getFileOrFolderNameFor(index: Int) -> String {
+    if (index >= self.mediaCount() || index < 0) {
+      return ""
+    }
+    
+    let asset = self.assetTuplesArray[index].asset
+    let dateTimeString = dateStringFrom(asset.creationDate)
+    let resources = self.assetTuplesArray[index].resources
+    var fileOrFolderSuffix = ""
+    if resources.count > 0 {
+      // In cas of multiple resources use the first resource name
+      fileOrFolderSuffix = "\(resources[0].originalFilename)_"
+    }
+    return "\(fileOrFolderSuffix)\(dateTimeString)"
+  }
+  
+  private func dateStringFrom(_ date: Date?) -> String {
+    guard let date = date else {
+      return ""
+    }
+    let dateFormatter = DateFormatter()
+    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+    dateFormatter.dateFormat = "yyyy_MM_dd'T'HH_mm_ss"
+    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+    return dateFormatter.string(from: date)
+  }
+  
   public func downloadMedia() {
     let assetIndex = 30
     let assetToDownload = self.assetTuplesArray[assetIndex].asset
@@ -208,6 +275,20 @@ class PhotoLibManagement {
      })
      print("Here")
      })*/
+  }
+  
+  private func saveAssetResource(
+    _ resource: PHAssetResource,
+    fileNameUrl: URL,
+    completionHandler: @escaping (Error?) -> Void
+  ) -> Void {
+    let assetRequestOptions = PHAssetResourceRequestOptions()
+    //assetRequestOptions.version =
+    assetRequestOptions.isNetworkAccessAllowed = true
+    PHAssetResourceManager.default().writeData(for: resource, toFile: fileNameUrl, options: assetRequestOptions) { (error) in
+      print("Saved resource directly \(resource) to filepath \(String(describing: fileNameUrl))")
+      completionHandler(error)
+    }
   }
   
   private func saveAssetResource(
