@@ -82,13 +82,8 @@ class PhotoLibManagement {
     
     let asset = self.assetTuplesArray[index].asset
     let resources = self.assetTuplesArray[index].resources
-    if resources.count == 1 {
-      self.saveAssetResource(resources[0], fileNameUrl: url) {(error) -> Void in
-        
-      }
-    }
-    
-    if (resources.count > 1) {
+    let saveToFolder = resources.count > 1
+    if saveToFolder {
       // Create folder first
       do {
         try FileManager.init().createDirectory(at: url, withIntermediateDirectories: false, attributes: nil)
@@ -99,17 +94,35 @@ class PhotoLibManagement {
     }
     let assetRequestOptions = PHAssetResourceRequestOptions()
     assetRequestOptions.isNetworkAccessAllowed = true
+    var filesCountToSave = resources.count
     for resource in resources {
-      let dateTimeString = self.dateStringFrom(asset.creationDate)
-      let fileName = "\(url.absoluteString)/\(dateTimeString)_\(resource.originalFilename)"
-      if let fileNameUrl = URL(string: fileName) {
-        self.saveAssetResource(resource, fileNameUrl: fileNameUrl) { (error) in
-          print("Saved resource directly \(resource) to filepath \(fileNameUrl)")
+      var fileNameUrl = url
+      if saveToFolder {
+        let dateTimeString = self.dateStringFrom(asset.creationDate)
+        let fileName = "\(url.absoluteString)/\(dateTimeString)_\(resource.originalFilename)"
+        if let fileNameUrlSingleFile = URL(string: fileName) {
+          fileNameUrl = fileNameUrlSingleFile
+        } else {
+          let errorString = "Error converting '\(fileName)' to URL"
+          print(errorString)
+          filesCountToSave -= 1
+          if filesCountToSave <= 0 {
+            completionHandler(NSError(domain:"", code:3, userInfo:[ NSLocalizedDescriptionKey: errorString]))
+          }
+          continue
         }
-      } else {
-        let errorString = "Error converting '\(fileName)' to URL"
-        print(errorString)
-        completionHandler(NSError(domain:"", code:3, userInfo:[ NSLocalizedDescriptionKey: errorString]))
+      }
+
+      self.saveAssetResource(resource, fileNameUrl: fileNameUrl) { (error) in
+        if let error = error {
+          print("Error: '\(error)' saving resource to filepath: \(fileNameUrl)")
+        } else {
+          print("Saved resource '\(resource)' to filepath: \(fileNameUrl)")
+        }
+        filesCountToSave -= 1
+        if filesCountToSave <= 0 {
+          completionHandler(nil)
+        }
       }
     }
   }
@@ -122,12 +135,15 @@ class PhotoLibManagement {
     let asset = self.assetTuplesArray[index].asset
     let dateTimeString = dateStringFrom(asset.creationDate)
     let resources = self.assetTuplesArray[index].resources
-    var fileOrFolderSuffix = ""
+    var fileNameOrFolderSuffix = ""
     if resources.count > 0 {
-      // In cas of multiple resources use the first resource name
-      fileOrFolderSuffix = "\(resources[0].originalFilename)_"
+      fileNameOrFolderSuffix = resources[0].originalFilename
+      // In case of multiple resources use the first resource name without extension as a folder suffix
+      if resources.count > 1 {
+        fileNameOrFolderSuffix = (fileNameOrFolderSuffix as NSString).deletingPathExtension
+      }
     }
-    return "\(fileOrFolderSuffix)\(dateTimeString)"
+    return "\(dateTimeString)_\(fileNameOrFolderSuffix)"
   }
   
   private func dateStringFrom(_ date: Date?) -> String {
