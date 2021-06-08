@@ -90,17 +90,16 @@ struct CellImageView: NSViewRepresentable {
 #endif
 
 struct CheckView: View {
-  @ObservedObject var viewModel: ViewModel
-  var idx: Int
+  @Binding var isSelected: Bool
   
   func toggle(){
-    viewModel.selectedImages[idx] = !viewModel.selectedImages[idx]
+    self.isSelected.toggle()
   }
   var body: some View {
     
     HStack{
       #if os(macOS)
-      Image(systemName: viewModel.selectedImages[idx] ? "checkmark.square": "square")
+      Image(systemName: isSelected ? "checkmark.square": "square")
         .gesture(TapGesture().modifiers(.shift).onEnded {
           print("Do anyting on Shift+Click")
           toggle()
@@ -114,7 +113,7 @@ struct CheckView: View {
         }
       
       #else
-      Image(systemName: isChecked ? "checkmark.square": "square")
+      Image(systemName: isSelected ? "checkmark.square": "square")
         .onLongPressGesture {
           print("Long Press")
           toggle()
@@ -131,9 +130,8 @@ struct SampleRow: View {
   let idx: Int
   let parent: Any
   let width: CGFloat
-  let viewModel: ViewModel
+  @ObservedObject var viewModel: ViewModel
   @ObservedObject public var imageLoaderModel = ImageLoaderModel()
-  @State private var status = true
   
   var body: some View {
     VStack(alignment: .center) {
@@ -145,7 +143,7 @@ struct SampleRow: View {
           .scaledToFit()
         #endif
         Text((imageLoaderModel.fileName ?? "NA") + " " + (imageLoaderModel.fileSize ?? "NA"))
-        CheckView(viewModel: viewModel, idx: idx)
+        CheckView(isSelected: $viewModel.selectedImages[idx])
         //Toggle("x", isOn: $status).onTapGesture {
         //  print("Here \(status)")
         //}
