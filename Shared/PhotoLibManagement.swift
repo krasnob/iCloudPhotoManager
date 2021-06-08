@@ -58,19 +58,24 @@ class PhotoLibManagement {
       requestOptions.isNetworkAccessAllowed = true
       requestOptions.version = PHImageRequestOptionsVersion.original
       requestOptions.deliveryMode = .highQualityFormat
-      self.imageCacheTuplesArray[index].imageRequestId = PHImageManager.default().requestImage(
+      let imageRequestId = PHImageManager.default().requestImage(
         for: asset, targetSize: targetSize, contentMode: .default, options: requestOptions, resultHandler:
           { (image: UIImage?, info: [AnyHashable : Any]?) in
             print("index: \(index)")
             if let requestedImage = image {
               self.imageCacheTuplesArray[index].image = requestedImage
-              
               DispatchQueue.main.async {
                 imageLoader.uiImage = requestedImage
               }
             }
+            DispatchQueue.main.async {
+              self.imageCacheTuplesArray[index].imageRequestId = PHInvalidImageRequestID
+            }
           }
       )
+      DispatchQueue.main.async {
+        self.imageCacheTuplesArray[index].imageRequestId = imageRequestId
+      }
     }
   }
   

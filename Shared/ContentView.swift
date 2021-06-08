@@ -19,9 +19,11 @@ class ImageLoaderModel: ObservableObject {
   @Published public var uiImage: UIImage?
   @Published public var fileSize: String?
   @Published public var fileName: String?
+  @Published public var isSelected: Bool = false
   //@Published public var
 }
 
+#if os(macOS)
 class DraggableImageView: NSImageView, NSDraggingSource, NSFilePromiseProviderDelegate {
   var idx: Int?
   
@@ -39,7 +41,11 @@ class DraggableImageView: NSImageView, NSDraggingSource, NSFilePromiseProviderDe
     return .copy
   }
   
-  override func mouseDown(with theEvent: NSEvent) {
+  override func mouseDown(with event: NSEvent) {
+    print("Here1")
+  }
+
+  override func mouseDragged(with theEvent: NSEvent) {
     guard let image = self.image else { return }
     //1.
     let filePromiseWriter = NSFilePromiseProvider(fileType: kUTTypeData as String, delegate: self)
@@ -80,6 +86,7 @@ struct CellImageView: NSViewRepresentable {
   }
   
 }
+#endif
 
 struct SampleRow: View {
   let idx: Int
@@ -131,7 +138,7 @@ struct ContentView: View {
         Button(action: {
           self.viewModel.cellMinimumWidth += 10
         }) {
-          Text("+")
+          Text("+").font(.system(size: 60))
         }
       }
       Button(action: {
