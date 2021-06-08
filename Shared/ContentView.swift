@@ -13,13 +13,14 @@ import UIKit
 class ViewModel: ObservableObject {
   @Published public var testText = "Hello"
   @Published var cellMinimumWidth: CGFloat = 80
+  @Published public var selectedImages: Array<Bool> = []
+  @Published public var areAllmagesSelected: Bool = false
 }
 
 class ImageLoaderModel: ObservableObject {
   @Published public var uiImage: UIImage?
   @Published public var fileSize: String?
   @Published public var fileName: String?
-  @Published public var isSelected: Bool = false
   //@Published public var
 }
 
@@ -36,7 +37,7 @@ class DraggableImageView: NSImageView, NSDraggingSource, NSFilePromiseProviderDe
     return
   }
   
-
+  
   func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
     return .copy
   }
@@ -44,7 +45,7 @@ class DraggableImageView: NSImageView, NSDraggingSource, NSFilePromiseProviderDe
   override func mouseDown(with event: NSEvent) {
     print("Here1")
   }
-
+  
   override func mouseDragged(with theEvent: NSEvent) {
     guard let image = self.image else { return }
     //1.
@@ -88,11 +89,51 @@ struct CellImageView: NSViewRepresentable {
 }
 #endif
 
+struct CheckView: View {
+  @ObservedObject var viewModel: ViewModel
+  var idx: Int
+  
+  func toggle(){
+    viewModel.selectedImages[idx] = !viewModel.selectedImages[idx]
+  }
+  var body: some View {
+    
+    HStack{
+      #if os(macOS)
+      Image(systemName: viewModel.selectedImages[idx] ? "checkmark.square": "square")
+        .gesture(TapGesture().modifiers(.shift).onEnded {
+          print("Do anyting on Shift+Click")
+          toggle()
+        })
+        .onTapGesture {
+          toggle()
+        }
+        .onLongPressGesture {
+          print("Long Press")
+          toggle()
+        }
+      
+      #else
+      Image(systemName: isChecked ? "checkmark.square": "square")
+        .onLongPressGesture {
+          print("Long Press")
+          toggle()
+        }
+        .onTapGesture {
+          toggle()
+        }
+      #endif
+    }
+  }
+}
+
 struct SampleRow: View {
   let idx: Int
   let parent: Any
   let width: CGFloat
+  let viewModel: ViewModel
   @ObservedObject public var imageLoaderModel = ImageLoaderModel()
+  @State private var status = true
   
   var body: some View {
     VStack(alignment: .center) {
@@ -104,17 +145,23 @@ struct SampleRow: View {
           .scaledToFit()
         #endif
         Text((imageLoaderModel.fileName ?? "NA") + " " + (imageLoaderModel.fileSize ?? "NA"))
+        CheckView(viewModel: viewModel, idx: idx)
+        //Toggle("x", isOn: $status).onTapGesture {
+        //  print("Here \(status)")
+        //}
       } else {
         Text("Row \(idx)").background(Color.blue)
       }
-    }
+    } // .background(Color.red)
   }
   
-  init(idx: Int, parent: Any, width: CGFloat) {
+  init(idx: Int, parent: Any, width: CGFloat, viewModel: ViewModel) {
     print("Loading row \(idx)")
+    print("Loading row \(idx) \(viewModel.selectedImages[idx]) ")
     self.parent = parent
     self.idx = idx
     self.width = width
+    self.viewModel = viewModel
     PhotoLibManagement.sharedInstance().getThumbnail(forIndex: idx, targetSize: CGSize(width: width, height: width), withImageLoader: imageLoaderModel)
   }
 }
@@ -138,18 +185,27 @@ struct ContentView: View {
         Button(action: {
           self.viewModel.cellMinimumWidth += 10
         }) {
-          Text("+").font(.system(size: 60))
+          Text("+").font(.system(size: 20))
         }
       }
-      Button(action: {
-        //self.testText = "Hi"
-        print("Here")
-        PhotoLibManagement.sharedInstance().getAllMedia(sortBy: .Size)
-        
-      }) {
-        Text("Tap Here")
+      HStack(alignment: .center) {
+        Button(action: {
+          //self.testText = "Hi"
+          print("Here")
+          PhotoLibManagement.sharedInstance().getAllMedia(sortBy: .Size)
+          
+        }) {
+          Text("Tap Here")
+        }
+        Button(action: {
+          self.viewModel.areAllmagesSelected = !self.viewModel.areAllmagesSelected
+          for i in 0 ..< viewModel.selectedImages.count {
+            viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
+          }
+        }) {
+          Text("Select All")
+        }
       }
-      
       Button(action: {
         //self.testText = "Hi"
         print("Here")
@@ -178,7 +234,7 @@ struct ContentView: View {
           GridItem(.adaptive(minimum: viewModel.cellMinimumWidth))
         ], spacing: 20) {
           ForEach(0 ..< PhotoLibManagement.sharedInstance().mediaCount(), id: \.self) { idx in
-            SampleRow(idx: idx, parent: self, width: self.viewModel.cellMinimumWidth)
+            SampleRow(idx: idx, parent: self, width: self.viewModel.cellMinimumWidth, viewModel: self.viewModel)
             
           }
         }

@@ -16,6 +16,7 @@ class AppState: ObservableObject {
   static let shared = AppState()    // << here !!
   @Published public var selectedTab = 0
   @Published var contentView: ContentView?
+  @Published var selectedImages: Array<Bool> = []
   //@Published var tabBarAppearance = UITabBar.appearance()
   // Singe source of truth...
   //@ObservedObject public var appState: StateModel = StateModel()

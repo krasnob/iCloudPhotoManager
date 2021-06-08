@@ -386,6 +386,7 @@ class PhotoLibManagement {
   private func populateMedia() {
     self.assetTuplesArray.removeAll()
     self.imageCacheTuplesArray.removeAll()
+    AppState.shared.contentView?.viewModel.selectedImages.removeAll()
     let fetchResult: PHFetchResult = PHAsset.fetchAssets(with: fetchOptions())
     // var assetTuplesArray: Array<(asset: PHAsset, resources: [PHAssetResource])> = []
     fetchResult.enumerateObjects { (asset: PHAsset, index: Int, stop: UnsafeMutablePointer<ObjCBool>) in
@@ -400,6 +401,7 @@ class PhotoLibManagement {
       return assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
     }
     self.imageCacheTuplesArray = Array(repeating: (image: nil, imageRequestId: PHInvalidImageRequestID), count: self.assetTuplesArray.count)
+    AppState.shared.contentView?.viewModel.selectedImages = Array(repeating: false, count: self.assetTuplesArray.count)
     AppState.shared.contentView?.viewModel.testText = "Done"
   }
   
