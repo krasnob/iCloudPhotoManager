@@ -81,6 +81,9 @@ struct CellImageView: NSViewRepresentable {
   
   func resizeImage(_ imageView: DraggableImageView) {
     let aspectRatio = self.image.size.height / self.image.size.width
+    if idx == 1 {
+      print("ddd")
+    }
     self.image.size.width = width
     self.image.size.height = width * aspectRatio
     imageView.image = self.image
@@ -89,21 +92,28 @@ struct CellImageView: NSViewRepresentable {
 }
 #endif
 
+func markRangeSelected(clickedIndex: Int) {
+  let selectedImages = AppState.shared.contentView?.viewModel.selectedImages
+  
+}
+
 struct CheckView: View {
-  @Binding var isSelected: Bool
+  @ObservedObject var viewModel: ViewModel
+  var idx: Int
   
   func toggle(){
-    self.isSelected.toggle()
+    viewModel.selectedImages[idx] = !viewModel.selectedImages[idx]
   }
   var body: some View {
     
     HStack{
       #if os(macOS)
-      Image(systemName: isSelected ? "checkmark.square": "square")
+      Image(systemName: viewModel.selectedImages[idx] ? "checkmark.square": "square").font(.system(size: 20))
         .gesture(TapGesture().modifiers(.shift).onEnded {
           print("Do anyting on Shift+Click")
           toggle()
-        })
+          //markRangeSelected()
+        }).background(Color.init(.sRGB, red: 255, green: 255, blue: 255, opacity: 0.3))
         .onTapGesture {
           toggle()
         }
@@ -130,20 +140,22 @@ struct SampleRow: View {
   let idx: Int
   let parent: Any
   let width: CGFloat
-  @ObservedObject var viewModel: ViewModel
+  let viewModel: ViewModel
   @ObservedObject public var imageLoaderModel = ImageLoaderModel()
   
   var body: some View {
     VStack(alignment: .center) {
       if let uiImage = imageLoaderModel.uiImage {
-        #if os(macOS)
-        CellImageView(image: uiImage, width: self.width, idx: self.idx)
-        #else
-        Image(uiImage: uiImage).resizable()
-          .scaledToFit()
-        #endif
+        ZStack(alignment: .topTrailing) {
+          #if os(macOS)
+          CellImageView(image: uiImage, width: self.width, idx: self.idx)
+          #else
+          Image(uiImage: uiImage).resizable()
+            .scaledToFit()
+          #endif
+          CheckView(viewModel: viewModel, idx: idx)
+        }
         Text((imageLoaderModel.fileName ?? "NA") + " " + (imageLoaderModel.fileSize ?? "NA"))
-        CheckView(isSelected: $viewModel.selectedImages[idx])
         //Toggle("x", isOn: $status).onTapGesture {
         //  print("Here \(status)")
         //}
@@ -155,7 +167,6 @@ struct SampleRow: View {
   
   init(idx: Int, parent: Any, width: CGFloat, viewModel: ViewModel) {
     print("Loading row \(idx)")
-    print("Loading row \(idx) \(viewModel.selectedImages[idx]) ")
     self.parent = parent
     self.idx = idx
     self.width = width

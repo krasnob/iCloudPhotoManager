@@ -15,7 +15,7 @@ import UIKit
 import Photos
 
 typealias AssetTuple = (asset: PHAsset, resources: [PHAssetResource])
-typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID)
+typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID, lastDownloadedSize: CGSize)
 
 class PhotoLibManagement {
   enum Sort {
@@ -50,7 +50,11 @@ class PhotoLibManagement {
     imageLoader.fileName = resource.originalFilename
     imageLoader.fileSize = "\(resource.value(forKey: "fileSize") as? Int ?? 0)"
     if let cachedImage = self.imageCacheTuplesArray[index].image {
-      imageLoader.uiImage = cachedImage
+      imageLoader.uiImage = cachedImage.copy() as? UIImage
+      let lastdownloadedSize = self.imageCacheTuplesArray[index].lastDownloadedSize
+      if lastdownloadedSize.width >= targetSize.width && lastdownloadedSize.height >= targetSize.height {
+        return
+      }
     }
     DispatchQueue.global(qos: .background).async {
       let asset = self.assetTuplesArray[index].asset
@@ -63,13 +67,14 @@ class PhotoLibManagement {
           { (image: UIImage?, info: [AnyHashable : Any]?) in
             print("index: \(index)")
             if let requestedImage = image {
-              self.imageCacheTuplesArray[index].image = requestedImage
               DispatchQueue.main.async {
+                self.imageCacheTuplesArray[index].image = requestedImage
                 imageLoader.uiImage = requestedImage
               }
             }
             DispatchQueue.main.async {
               self.imageCacheTuplesArray[index].imageRequestId = PHInvalidImageRequestID
+              self.imageCacheTuplesArray[index].lastDownloadedSize = targetSize
             }
           }
       )
@@ -400,7 +405,7 @@ class PhotoLibManagement {
     self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
       return assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
     }
-    self.imageCacheTuplesArray = Array(repeating: (image: nil, imageRequestId: PHInvalidImageRequestID), count: self.assetTuplesArray.count)
+    self.imageCacheTuplesArray = Array(repeating: (image: nil, imageRequestId: PHInvalidImageRequestID, lastDownloadedSize: .zero), count: self.assetTuplesArray.count)
     AppState.shared.contentView?.viewModel.selectedImages = Array(repeating: false, count: self.assetTuplesArray.count)
     AppState.shared.contentView?.viewModel.testText = "Done"
   }
