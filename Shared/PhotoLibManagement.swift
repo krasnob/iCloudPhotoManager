@@ -66,15 +66,13 @@ class PhotoLibManagement {
         for: asset, targetSize: targetSize, contentMode: .default, options: requestOptions, resultHandler:
           { (image: UIImage?, info: [AnyHashable : Any]?) in
             print("index: \(index)")
-            if let requestedImage = image {
-              DispatchQueue.main.async {
-                self.imageCacheTuplesArray[index].image = requestedImage
-                imageLoader.uiImage = requestedImage
-              }
-            }
             DispatchQueue.main.async {
               self.imageCacheTuplesArray[index].imageRequestId = PHInvalidImageRequestID
-              self.imageCacheTuplesArray[index].lastDownloadedSize = targetSize
+              if let requestedImage = image {
+                self.imageCacheTuplesArray[index].image = requestedImage
+                self.imageCacheTuplesArray[index].lastDownloadedSize = targetSize
+                imageLoader.uiImage = requestedImage
+              }
             }
           }
       )

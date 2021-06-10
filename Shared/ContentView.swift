@@ -166,7 +166,7 @@ struct SampleRow: View {
   }
   
   init(idx: Int, parent: Any, width: CGFloat, viewModel: ViewModel) {
-    print("Loading row \(idx)")
+    //print("Loading row \(idx)")
     self.parent = parent
     self.idx = idx
     self.width = width
