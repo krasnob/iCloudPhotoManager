@@ -108,7 +108,7 @@ struct CheckView: View {
     
     HStack{
       #if os(macOS)
-      Image(systemName: viewModel.selectedImages[idx] ? "checkmark.square": "square").font(.system(size: 20))
+      Image(systemName: (viewModel.selectedImages.count > idx && viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
         .gesture(TapGesture().modifiers(.shift).onEnded {
           print("Do anyting on Shift+Click")
           toggle()

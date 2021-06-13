@@ -41,6 +41,7 @@ class PhotoLibManagement {
     return self.assetTuplesArray.count
   }
   
+  
   public func getThumbnail(forIndex index: Int, targetSize: CGSize, withImageLoader imageLoader: ImageLoaderModel) {
     if (index >= self.mediaCount()) {
       return
@@ -56,6 +57,7 @@ class PhotoLibManagement {
         return
       }
     }
+    print("index: \(index) main")
     DispatchQueue.global(qos: .background).async {
       let asset = self.assetTuplesArray[index].asset
       let requestOptions = PHImageRequestOptions()
@@ -65,7 +67,7 @@ class PhotoLibManagement {
       let imageRequestId = PHImageManager.default().requestImage(
         for: asset, targetSize: targetSize, contentMode: .default, options: requestOptions, resultHandler:
           { (image: UIImage?, info: [AnyHashable : Any]?) in
-            print("index: \(index)")
+            print("index: \(index) background")
             DispatchQueue.main.async {
               self.imageCacheTuplesArray[index].imageRequestId = PHInvalidImageRequestID
               if let requestedImage = image {
