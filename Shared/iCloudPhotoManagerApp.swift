@@ -16,7 +16,6 @@ class AppState: ObservableObject {
   static let shared = AppState()    // << here !!
   @Published public var selectedTab = 0
   @Published var contentView: ContentView?
-  @Published var selectedImages: Array<Bool> = []
   //@Published var tabBarAppearance = UITabBar.appearance()
   // Singe source of truth...
   //@ObservedObject public var appState: StateModel = StateModel()
@@ -25,6 +24,7 @@ class AppState: ObservableObject {
 @main
 struct iCloudPhotoManagerApp: App {
   @State public var selection = 0
+  @State var viewModel: ViewModel = ViewModel()
   init() {
     //AppState.shared.appState.contentView = ContentView(selectedTab: AppState.shared.$appState.selectedTab)
     //AppState.shared.appState.app = self
@@ -44,7 +44,7 @@ struct iCloudPhotoManagerApp: App {
     WindowGroup {
       TabView(selection:index,
               content:  {
-                ContentView(selectedTab: index).tabItem { Text("Tab Label 1") }.tag(0)
+                ContentView(selectedTab: index, viewModel: viewModel).tabItem { Text("Tab Label 1") }.tag(0)
                 //AppState.shared.appState.contentView.tabItem { Text("Tab Label 1") }.tag(0)
                 SettingsView(selectedTab: index).tabItem { Text("Tab Label 2") }.tag(1)
               }).id(self.selection)

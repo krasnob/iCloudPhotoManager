@@ -13,8 +13,8 @@ import UIKit
 class ViewModel: ObservableObject {
   @Published public var testText = "Hello"
   @Published var cellMinimumWidth: CGFloat = 80
-  @Published public var selectedImages: Array<Bool> = []
-  @Published public var areAllmagesSelected: Bool = false
+  @Published var selectedImages: Array<Bool> = []
+  @Published var areAllmagesSelected: Bool = false
 }
 
 class ImageLoaderModel: ObservableObject {
@@ -81,9 +81,6 @@ struct CellImageView: NSViewRepresentable {
   
   func resizeImage(_ imageView: DraggableImageView) {
     let aspectRatio = self.image.size.height / self.image.size.width
-    if idx == 1 {
-      print("ddd")
-    }
     self.image.size.width = width
     self.image.size.height = width * aspectRatio
     imageView.image = self.image
@@ -102,13 +99,13 @@ struct CheckView: View {
   var idx: Int
   
   func toggle(){
-    viewModel.selectedImages[idx] = !viewModel.selectedImages[idx]
+    self.viewModel.selectedImages[idx] = !self.viewModel.selectedImages[idx]
   }
   var body: some View {
     
     HStack{
       #if os(macOS)
-      Image(systemName: (viewModel.selectedImages.count > idx && viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
+      Image(systemName: (self.viewModel.selectedImages.count > idx && self.viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
         .gesture(TapGesture().modifiers(.shift).onEnded {
           print("Do anyting on Shift+Click")
           toggle()
@@ -176,10 +173,12 @@ struct SampleRow: View {
 }
 
 struct ContentView: View {
-  @ObservedObject public var viewModel: ViewModel = ViewModel()
   @Binding var selectedTab: Int
-  init(selectedTab: Binding<Int>) {
+  @ObservedObject var viewModel: ViewModel
+
+  init(selectedTab: Binding<Int>, viewModel: ViewModel) {
     self._selectedTab = selectedTab
+    self.viewModel = viewModel
     AppState.shared.contentView = self
   }
   var body: some View {
@@ -208,8 +207,8 @@ struct ContentView: View {
         }
         Button(action: {
           self.viewModel.areAllmagesSelected = !self.viewModel.areAllmagesSelected
-          for i in 0 ..< viewModel.selectedImages.count {
-            viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
+          for i in 0 ..< (AppState.shared.contentView?.viewModel.selectedImages.count ?? 0) {
+            self.viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
           }
         }) {
           Text("Select All")
@@ -244,7 +243,6 @@ struct ContentView: View {
         ], spacing: 20) {
           ForEach(0 ..< PhotoLibManagement.sharedInstance().mediaCount(), id: \.self) { idx in
             SampleRow(idx: idx, parent: self, width: self.viewModel.cellMinimumWidth, viewModel: self.viewModel)
-            
           }
         }
         .padding(.horizontal)
@@ -259,7 +257,8 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
   @State static var selectedTab = 1
+  @State static var viewModel = ViewModel()
   static var previews: some View {
-    ContentView(selectedTab: $selectedTab)
+    ContentView(selectedTab: $selectedTab, viewModel: viewModel)
   }
 }
