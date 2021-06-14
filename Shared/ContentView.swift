@@ -14,6 +14,7 @@ class ViewModel: ObservableObject {
   @Published public var testText = "Hello"
   @Published var cellMinimumWidth: CGFloat = 80
   @Published var selectedImages: Array<Bool> = []
+  @Published var lastSelectedImageIndex: Int = 0
   @Published var areAllmagesSelected: Bool = false
 }
 
@@ -90,15 +91,27 @@ struct CellImageView: NSViewRepresentable {
 #endif
 
 func markRangeSelected(clickedIndex: Int) {
-  let selectedImages = AppState.shared.contentView?.viewModel.selectedImages
-  
+  guard let viewModel = AppState.shared.contentView?.viewModel else {
+    return
+  }
+  if (clickedIndex < viewModel.selectedImages.count) {
+    for i in 0 ..< viewModel.selectedImages.count {
+      if viewModel.selectedImages[i] {
+        for j in i ... clickedIndex {
+          viewModel.selectedImages[j] = true
+        }
+        break
+      }
+    }
+  }
 }
 
 struct CheckView: View {
   @ObservedObject var viewModel: ViewModel
   var idx: Int
   
-  func toggle(){
+  func toggle() {
+    self.viewModel.lastSelectedImageIndex = idx
     self.viewModel.selectedImages[idx] = !self.viewModel.selectedImages[idx]
   }
   var body: some View {
@@ -107,9 +120,7 @@ struct CheckView: View {
       #if os(macOS)
       Image(systemName: (self.viewModel.selectedImages.count > idx && self.viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
         .gesture(TapGesture().modifiers(.shift).onEnded {
-          print("Do anyting on Shift+Click")
-          toggle()
-          //markRangeSelected()
+          markRangeSelected(clickedIndex: self.idx)
         }).background(Color.init(.sRGB, red: 255, green: 255, blue: 255, opacity: 0.3))
         .onTapGesture {
           toggle()
@@ -120,13 +131,11 @@ struct CheckView: View {
         }
       
       #else
-      Image(systemName: isSelected ? "checkmark.square": "square")
-        .onLongPressGesture {
-          print("Long Press")
-          toggle()
-        }
+      Image(systemName: (self.viewModel.selectedImages.count > idx && self.viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
         .onTapGesture {
           toggle()
+        }.onLongPressGesture {
+          markRangeSelected(clickedIndex: self.idx)
         }
       #endif
     }
