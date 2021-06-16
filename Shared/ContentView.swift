@@ -226,7 +226,7 @@ struct ContentView: View {
       Button(action: {
         //self.testText = "Hi"
         print("Here")
-        PhotoLibManagement.sharedInstance().downloadMedia()
+        PhotoLibManagement.sharedInstance().downloadSelectedMediaToUserSelectedFolder()
         
       }) {
         Text("Download")

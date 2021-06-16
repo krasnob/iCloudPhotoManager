@@ -17,6 +17,21 @@ import Photos
 typealias AssetTuple = (asset: PHAsset, resources: [PHAssetResource])
 typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID, lastDownloadedSize: CGSize)
 
+#if os(iOS)
+class DocumentPickerDelegateiOS: NSObject, UIDocumentPickerDelegate {
+  let fnDownloadSelectedMediaToUrl: (URL) -> Void
+  
+  init(fnDownloadSelectedMediaToUrl: @escaping (URL) -> Void) {
+    self.fnDownloadSelectedMediaToUrl = fnDownloadSelectedMediaToUrl
+  }
+  
+  // MARK: - UIDocumentPickerDelegate
+  func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
+    self.fnDownloadSelectedMediaToUrl(url)
+  }
+}
+#endif
+
 class PhotoLibManagement {
   enum Sort {
     case Size
@@ -26,6 +41,9 @@ class PhotoLibManagement {
   private var authorizationStatus = PHAuthorizationStatus.notDetermined
   private var assetTuplesArray: Array<AssetTuple> = []
   private var imageCacheTuplesArray: Array<ImageCacheTuple> = []
+  #if os(iOS)
+  private var documentPickerDelegateiOS: DocumentPickerDelegateiOS?;
+  #endif
   
   // MARK: - Public Methods
   
@@ -98,6 +116,7 @@ class PhotoLibManagement {
       do {
         try FileManager.init().createDirectory(at: url, withIntermediateDirectories: false, attributes: nil)
       } catch {
+        print("Error: \(error)")
         completionHandler(error)
         return
       }
@@ -165,6 +184,63 @@ class PhotoLibManagement {
     dateFormatter.dateFormat = "yyyy_MM_dd'T'HH_mm_ss"
     dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
     return dateFormatter.string(from: date)
+  }
+  
+  private func downloadSelectedMediaToUrl(_ url: URL) {
+    guard let viewModel = AppState.shared.contentView?.viewModel else {
+      return
+    }
+    guard url.startAccessingSecurityScopedResource() else {
+      return
+    }
+    var savedFilesCount = 0
+    for i in 0 ..< viewModel.selectedImages.count {
+      if viewModel.selectedImages[i] {
+        let fileOrFolderName = getFileOrFolderNameFor(index: i)
+        savedFilesCount += 1
+        saveAssetWithIndex(
+          i,
+          toUrl: url.appendingPathComponent(fileOrFolderName),
+          withCompletionhandler: { (error: Error?) in
+            savedFilesCount -= 1
+            if savedFilesCount <= 0 {
+              url.stopAccessingSecurityScopedResource()
+            }
+          }
+        )
+      }
+    }
+  }
+  
+  public func downloadSelectedMediaToUserSelectedFolder() {
+    #if !os(iOS)
+    let openPanel = NSOpenPanel()
+    openPanel.canCreateDirectories = true
+    openPanel.level = .modalPanel
+    openPanel.nameFieldStringValue  = ""
+    openPanel.canChooseDirectories = true
+    openPanel.canChooseFiles = false
+    openPanel.prompt = "Select Directory"
+    openPanel.begin {(result) in
+      if result.rawValue == NSApplication.ModalResponse.OK.rawValue{
+        self.downloadSelectedMediaToUrl(openPanel.url!)
+      }
+    }
+    #else
+    // let documentPicker = UIDocumentPickerViewController(forExporting: [URL(fileURLWithPath: "/")], asCopy: true)
+    let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
+    self.documentPickerDelegateiOS = DocumentPickerDelegateiOS(fnDownloadSelectedMediaToUrl: self.downloadSelectedMediaToUrl)
+    documentPicker.delegate = self.documentPickerDelegateiOS
+    documentPicker.allowsMultipleSelection = false
+    
+    
+    // Set the initial directory.
+    documentPicker.directoryURL = URL(fileURLWithPath: "/")
+    
+    
+    // Present the document picker.
+    UIApplication.shared.windows.filter {$0.isKeyWindow}.first?.rootViewController?.present(documentPicker, animated: true, completion: nil)
+    #endif
   }
   
   public func downloadMedia() {
