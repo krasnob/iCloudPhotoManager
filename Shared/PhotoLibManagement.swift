@@ -30,6 +30,9 @@ class DocumentPickerDelegateiOS: NSObject, UIDocumentPickerDelegate {
     self.fnDownloadSelectedMediaToUrl(url)
   }
 }
+let screenScale = UIScreen.main.scale
+#else
+let screenScale: CGFloat = 1.0
 #endif
 
 class PhotoLibManagement {
@@ -64,6 +67,7 @@ class PhotoLibManagement {
     if (index >= self.mediaCount()) {
       return
     }
+    let adjustedTargetSize = CGSize(width: targetSize.width * screenScale, height: targetSize.height * screenScale)
     PHImageManager.default().cancelImageRequest(self.imageCacheTuplesArray[index].imageRequestId)
     let resource = self.assetTuplesArray[index].resources[0]
     imageLoader.fileName = resource.originalFilename
@@ -71,11 +75,11 @@ class PhotoLibManagement {
     if let cachedImage = self.imageCacheTuplesArray[index].image {
       imageLoader.uiImage = cachedImage.copy() as? UIImage
       let lastdownloadedSize = self.imageCacheTuplesArray[index].lastDownloadedSize
-      if lastdownloadedSize.width >= targetSize.width && lastdownloadedSize.height >= targetSize.height {
+      if lastdownloadedSize.width >= adjustedTargetSize.width && lastdownloadedSize.height >= adjustedTargetSize.height {
         return
       }
     }
-    print("index: \(index) main")
+    // print("index: \(index) main")
     DispatchQueue.global(qos: .background).async {
       let asset = self.assetTuplesArray[index].asset
       let requestOptions = PHImageRequestOptions()
@@ -83,14 +87,14 @@ class PhotoLibManagement {
       requestOptions.version = PHImageRequestOptionsVersion.original
       requestOptions.deliveryMode = .highQualityFormat
       let imageRequestId = PHImageManager.default().requestImage(
-        for: asset, targetSize: targetSize, contentMode: .default, options: requestOptions, resultHandler:
+        for: asset, targetSize: adjustedTargetSize, contentMode: .default, options: requestOptions, resultHandler:
           { (image: UIImage?, info: [AnyHashable : Any]?) in
-            print("index: \(index) background")
+            // print("index: \(index) background")
             DispatchQueue.main.async {
               self.imageCacheTuplesArray[index].imageRequestId = PHInvalidImageRequestID
               if let requestedImage = image {
                 self.imageCacheTuplesArray[index].image = requestedImage
-                self.imageCacheTuplesArray[index].lastDownloadedSize = targetSize
+                self.imageCacheTuplesArray[index].lastDownloadedSize = adjustedTargetSize
                 imageLoader.uiImage = requestedImage
               }
             }
@@ -512,6 +516,22 @@ class PhotoLibManagement {
     return fetchOptions
   }
   
+  private func showAuthenticationPrompt() {
+    #if os(iOS)
+    let alertController = UIAlertController(title: "Please Enable Access To Photos", message: nil, preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+    alertController.addAction(UIAlertAction(title: "Settings", style: .default, handler: { action in
+      UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
+    }))
+    UIApplication.shared.windows.filter {$0.isKeyWindow}.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+    #else
+    let alert = NSAlert()
+    alert.addButton(withTitle: "Dismiss")
+    alert.addButton(withTitle: "Open Settings")
+    let result = alert.runModal()
+    #endif
+  }
+  
   private func requestAuthorization() {
     self.authorizationStatus = PHPhotoLibrary.authorizationStatus()
     switch self.authorizationStatus {
@@ -529,6 +549,7 @@ class PhotoLibManagement {
      print("Here 3")*/
     case .restricted, .denied:
       print("Photo Auth restricted or denied")
+      self.showAuthenticationPrompt()
     case .notDetermined:
       PHPhotoLibrary.requestAuthorization { status in
         switch status {
@@ -536,11 +557,16 @@ class PhotoLibManagement {
           self.populateMedia()
         case .restricted, .denied:
           print("Photo Auth restricted or denied")
+          self.showAuthenticationPrompt()
         case .notDetermined: break
+        case .limited:
+          self.populateMedia()
         @unknown default:
           print("Error")
         }
       }
+    case .limited:
+      self.populateMedia()
     @unknown default:
       print("Error")
     }

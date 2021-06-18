@@ -97,7 +97,8 @@ func markRangeSelected(clickedIndex: Int) {
   if (clickedIndex < viewModel.selectedImages.count) {
     for i in 0 ..< viewModel.selectedImages.count {
       if viewModel.selectedImages[i] {
-        for j in i ... clickedIndex {
+        let selectedArray = stride(from: i, to: clickedIndex, by: i > clickedIndex ? -1 : 1)
+        for j in selectedArray {
           viewModel.selectedImages[j] = true
         }
         break
@@ -144,7 +145,7 @@ struct CheckView: View {
 
 struct SampleRow: View {
   let idx: Int
-  let parent: Any
+  let parent: ContentView
   let width: CGFloat
   let viewModel: ViewModel
   @ObservedObject public var imageLoaderModel = ImageLoaderModel()
@@ -157,7 +158,7 @@ struct SampleRow: View {
           CellImageView(image: uiImage, width: self.width, idx: self.idx)
           #else
           Image(uiImage: uiImage).resizable()
-            .scaledToFit()
+            .scaledToFit().animation(.easeInOut)
           #endif
           CheckView(viewModel: viewModel, idx: idx)
         }
@@ -171,20 +172,21 @@ struct SampleRow: View {
     } // .background(Color.red)
   }
   
-  init(idx: Int, parent: Any, width: CGFloat, viewModel: ViewModel) {
+  init(idx: Int, parent: ContentView, width: CGFloat, viewModel: ViewModel) {
     //print("Loading row \(idx)")
     self.parent = parent
     self.idx = idx
     self.width = width
     self.viewModel = viewModel
-    PhotoLibManagement.sharedInstance().getThumbnail(forIndex: idx, targetSize: CGSize(width: width, height: width), withImageLoader: imageLoaderModel)
+    PhotoLibManagement.sharedInstance().getThumbnail(forIndex: idx, targetSize: CGSize(width: width * self.parent.scale, height: width * self.parent.scale), withImageLoader: imageLoaderModel)
   }
 }
 
 struct ContentView: View {
   @Binding var selectedTab: Int
   @ObservedObject var viewModel: ViewModel
-
+  
+  @State var scale: CGFloat = 1.0
   init(selectedTab: Binding<Int>, viewModel: ViewModel) {
     self._selectedTab = selectedTab
     self.viewModel = viewModel
@@ -203,6 +205,10 @@ struct ContentView: View {
           self.viewModel.cellMinimumWidth += 10
         }) {
           Text("+").font(.system(size: 20))
+        }
+        Text("Descending")
+        Image(systemName: true ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
+          
         }
       }
       HStack(alignment: .center) {
@@ -254,7 +260,14 @@ struct ContentView: View {
             SampleRow(idx: idx, parent: self, width: self.viewModel.cellMinimumWidth, viewModel: self.viewModel)
           }
         }
-        .padding(.horizontal)
+        .padding(.horizontal).scaleEffect(self.scale)
+        .gesture(MagnificationGesture()
+                  .onChanged { value in
+                    self.scale = value.magnitude
+                  }.onEnded {value in
+                    self.scale = 1.0
+                    self.viewModel.cellMinimumWidth = self.viewModel.cellMinimumWidth * value.magnitude
+                  })
       }
       /*ForEach((1...10).reversed(), id: \.self) {
        Text("\($0)…")
