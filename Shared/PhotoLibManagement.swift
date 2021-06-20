@@ -15,7 +15,7 @@ import UIKit
 import Photos
 
 typealias AssetTuple = (asset: PHAsset, resources: [PHAssetResource])
-typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID, lastDownloadedSize: CGSize)
+typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID, imageLoader: ImageLoaderModel?, lastDownloadedSize: CGSize)
 
 #if os(iOS)
 class DocumentPickerDelegateiOS: NSObject, UIDocumentPickerDelegate {
@@ -74,6 +74,7 @@ class PhotoLibManagement {
     }
     let adjustedTargetSize = CGSize(width: targetSize.width * screenScale, height: targetSize.height * screenScale)
     let asset = self.assetTuplesArray[index].asset
+    self.imageCacheTuplesArray[asset.localIdentifier]?.imageLoader = imageLoader
     if let imageCacheTuple = self.imageCacheTuplesArray[asset.localIdentifier] {
       let resource = self.assetTuplesArray[index].resources[0]
       imageLoader.fileName = resource.originalFilename
@@ -87,13 +88,21 @@ class PhotoLibManagement {
           }
           return
         }
+      } else if imageCacheTuple.lastDownloadedSize.width >= adjustedTargetSize.width && imageCacheTuple.lastDownloadedSize.height >= adjustedTargetSize.height {
+        // Request already running
+        return
       }
     }
+    if let imageCacheTuple = self.imageCacheTuplesArray[asset.localIdentifier],
+       imageCacheTuple.imageRequestId != PHInvalidImageRequestID {
+      PHImageManager.default().cancelImageRequest(imageCacheTuple.imageRequestId)
+    }
+    self.imageCacheTuplesArray[asset.localIdentifier]?.lastDownloadedSize = adjustedTargetSize
     DispatchQueue.global(qos: .background).async {
       let requestOptions = PHImageRequestOptions()
       requestOptions.isNetworkAccessAllowed = true
       requestOptions.version = PHImageRequestOptionsVersion.original
-      requestOptions.deliveryMode = .opportunistic
+      requestOptions.deliveryMode = .highQualityFormat
       print("index: \(index) before requestImage")
       let imageRequestId = PHImageManager.default().requestImage(
         for: asset, targetSize: adjustedTargetSize, contentMode: .default, options: requestOptions, resultHandler:
@@ -103,8 +112,7 @@ class PhotoLibManagement {
               self.imageCacheTuplesArray[asset.localIdentifier]?.imageRequestId = PHInvalidImageRequestID
               if let requestedImage = image {
                 self.imageCacheTuplesArray[asset.localIdentifier]?.image = requestedImage
-                self.imageCacheTuplesArray[asset.localIdentifier]?.lastDownloadedSize = adjustedTargetSize
-                imageLoader.uiImage = requestedImage
+                self.imageCacheTuplesArray[asset.localIdentifier]?.imageLoader?.uiImage = requestedImage
               }
             }
           }
@@ -284,6 +292,7 @@ class PhotoLibManagement {
          imageRequestId != PHInvalidImageRequestID {
         PHImageManager.default().cancelImageRequest(imageRequestId)
         self.imageCacheTuplesArray[imageCacheTupleKey]?.imageRequestId = PHInvalidImageRequestID
+        self.imageCacheTuplesArray[imageCacheTupleKey]?.imageLoader = nil
       }
     }
   }
@@ -497,7 +506,7 @@ class PhotoLibManagement {
     fetchResult.enumerateObjects { (asset: PHAsset, index: Int, stop: UnsafeMutablePointer<ObjCBool>) in
       let assetTuple = (asset: asset, resources: PHAssetResource.assetResources(for: asset))
       self.assetTuplesArray.append(assetTuple)
-      self.imageCacheTuplesArray[asset.localIdentifier] = (image: nil, imageRequestId: PHInvalidImageRequestID, lastDownloadedSize : CGSize.zero)
+      self.imageCacheTuplesArray[asset.localIdentifier] = (image: nil, imageRequestId: PHInvalidImageRequestID, imageLoader: nil, lastDownloadedSize : CGSize.zero)
     }
     self.sortMediaAssets()
   }
@@ -505,7 +514,7 @@ class PhotoLibManagement {
   public func sortMediaAssets() {
     let sortOrder = AppState.shared.contentView?.viewModel.sortOrder ?? SortOrder.Descending
 
-    self.cancelAllImageRequests()
+    //self.cancelAllImageRequests()
 
     self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
       let asset1GreaterThanAsset2 = assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
