@@ -17,7 +17,7 @@ struct SettingsView: View {
       Button(action: {
         //self.testText = "Hi"
         print("Here")
-         PhotoLibManagement.sharedInstance().getAllMedia(sortBy: .Size)
+         PhotoLibManagement.sharedInstance().refreshMediaAssets()
         
       }) {
         Text("Tap Here")

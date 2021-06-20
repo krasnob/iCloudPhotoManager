@@ -38,12 +38,17 @@ let screenScale: CGFloat = 1.0
 class PhotoLibManagement {
   enum Sort {
     case Size
+    case Date
+  }
+  enum SortOrder {
+    case Ascendig
+    case Descending
   }
   private static let instance = PhotoLibManagement()
   
   private var authorizationStatus = PHAuthorizationStatus.notDetermined
   private var assetTuplesArray: Array<AssetTuple> = []
-  private var imageCacheTuplesArray: Array<ImageCacheTuple> = []
+  private var imageCacheTuplesArray: Dictionary<String, ImageCacheTuple> = [:]
   #if os(iOS)
   private var documentPickerDelegateiOS: DocumentPickerDelegateiOS?;
   #endif
@@ -54,7 +59,7 @@ class PhotoLibManagement {
     return instance
   }
   
-  public func getAllMedia(sortBy: Sort) {
+  public func refreshMediaAssets() {
     self.requestAuthorization()
   }
   
@@ -68,40 +73,44 @@ class PhotoLibManagement {
       return
     }
     let adjustedTargetSize = CGSize(width: targetSize.width * screenScale, height: targetSize.height * screenScale)
-    PHImageManager.default().cancelImageRequest(self.imageCacheTuplesArray[index].imageRequestId)
-    let resource = self.assetTuplesArray[index].resources[0]
-    imageLoader.fileName = resource.originalFilename
-    imageLoader.fileSize = "\(resource.value(forKey: "fileSize") as? Int ?? 0)"
-    if let cachedImage = self.imageCacheTuplesArray[index].image {
-      imageLoader.uiImage = cachedImage.copy() as? UIImage
-      let lastdownloadedSize = self.imageCacheTuplesArray[index].lastDownloadedSize
-      if lastdownloadedSize.width >= adjustedTargetSize.width && lastdownloadedSize.height >= adjustedTargetSize.height {
-        return
+    let asset = self.assetTuplesArray[index].asset
+    if let imageCacheTuple = self.imageCacheTuplesArray[asset.localIdentifier] {
+      let resource = self.assetTuplesArray[index].resources[0]
+      imageLoader.fileName = resource.originalFilename
+      imageLoader.fileSize = "\(resource.value(forKey: "fileSize") as? Int ?? 0)"
+      if let cachedImage = imageCacheTuple.image {
+        imageLoader.uiImage = cachedImage.copy() as? UIImage
+        let lastdownloadedSize = imageCacheTuple.lastDownloadedSize
+        if lastdownloadedSize.width >= adjustedTargetSize.width && lastdownloadedSize.height >= adjustedTargetSize.height {
+          if (imageCacheTuple.imageRequestId != PHInvalidImageRequestID) {
+            PHImageManager.default().cancelImageRequest(imageCacheTuple.imageRequestId)
+          }
+          return
+        }
       }
     }
-    // print("index: \(index) main")
     DispatchQueue.global(qos: .background).async {
-      let asset = self.assetTuplesArray[index].asset
       let requestOptions = PHImageRequestOptions()
       requestOptions.isNetworkAccessAllowed = true
       requestOptions.version = PHImageRequestOptionsVersion.original
-      requestOptions.deliveryMode = .highQualityFormat
+      requestOptions.deliveryMode = .opportunistic
+      print("index: \(index) before requestImage")
       let imageRequestId = PHImageManager.default().requestImage(
         for: asset, targetSize: adjustedTargetSize, contentMode: .default, options: requestOptions, resultHandler:
           { (image: UIImage?, info: [AnyHashable : Any]?) in
-            // print("index: \(index) background")
+            print("index: \(index) background: \(String(describing: image))")
             DispatchQueue.main.async {
-              self.imageCacheTuplesArray[index].imageRequestId = PHInvalidImageRequestID
+              self.imageCacheTuplesArray[asset.localIdentifier]?.imageRequestId = PHInvalidImageRequestID
               if let requestedImage = image {
-                self.imageCacheTuplesArray[index].image = requestedImage
-                self.imageCacheTuplesArray[index].lastDownloadedSize = adjustedTargetSize
+                self.imageCacheTuplesArray[asset.localIdentifier]?.image = requestedImage
+                self.imageCacheTuplesArray[asset.localIdentifier]?.lastDownloadedSize = adjustedTargetSize
                 imageLoader.uiImage = requestedImage
               }
             }
           }
       )
       DispatchQueue.main.async {
-        self.imageCacheTuplesArray[index].imageRequestId = imageRequestId
+        self.imageCacheTuplesArray[asset.localIdentifier]!.imageRequestId = imageRequestId
       }
     }
   }
@@ -267,6 +276,16 @@ class PhotoLibManagement {
       }
     }
     
+  }
+  
+  public func cancelAllImageRequests() {
+    for imageCacheTupleKey in self.imageCacheTuplesArray.keys {
+      if let imageRequestId = self.imageCacheTuplesArray[imageCacheTupleKey]?.imageRequestId,
+         imageRequestId != PHInvalidImageRequestID {
+        PHImageManager.default().cancelImageRequest(imageRequestId)
+        self.imageCacheTuplesArray[imageCacheTupleKey]?.imageRequestId = PHInvalidImageRequestID
+      }
+    }
   }
   
   public func downloadMediaOld() {
@@ -468,24 +487,31 @@ class PhotoLibManagement {
       })
   }
   
-  private func populateMedia() {
+  private func fetchMediaAssets() {
     self.assetTuplesArray.removeAll()
+    self.cancelAllImageRequests()
     self.imageCacheTuplesArray.removeAll()
     AppState.shared.contentView?.viewModel.selectedImages.removeAll()
     let fetchResult: PHFetchResult = PHAsset.fetchAssets(with: fetchOptions())
     // var assetTuplesArray: Array<(asset: PHAsset, resources: [PHAssetResource])> = []
     fetchResult.enumerateObjects { (asset: PHAsset, index: Int, stop: UnsafeMutablePointer<ObjCBool>) in
       let assetTuple = (asset: asset, resources: PHAssetResource.assetResources(for: asset))
-      print("Asset: \(assetTuple.resources[0].originalFilename) index: \(index)")
-      if assetTuple.resources[0].originalFilename == "4f1fd31d858d39c7787d759671933f25.mov" {
-        print("hhh")
-      }
       self.assetTuplesArray.append(assetTuple)
+      self.imageCacheTuplesArray[asset.localIdentifier] = (image: nil, imageRequestId: PHInvalidImageRequestID, lastDownloadedSize : CGSize.zero)
     }
+    self.sortMediaAssets()
+  }
+  
+  public func sortMediaAssets() {
+    let sortOrder = AppState.shared.contentView?.viewModel.sortOrder ?? SortOrder.Descending
+
+    self.cancelAllImageRequests()
+
     self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
-      return assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
+      let asset1GreaterThanAsset2 = assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
+      return sortOrder == .Descending ? asset1GreaterThanAsset2 : !asset1GreaterThanAsset2
     }
-    self.imageCacheTuplesArray = Array(repeating: (image: nil, imageRequestId: PHInvalidImageRequestID, lastDownloadedSize: .zero), count: self.assetTuplesArray.count)
+
     AppState.shared.contentView?.viewModel.selectedImages = Array(repeating: false, count: self.assetTuplesArray.count)
     AppState.shared.contentView?.viewModel.testText = "Done"
   }
@@ -536,7 +562,7 @@ class PhotoLibManagement {
     self.authorizationStatus = PHPhotoLibrary.authorizationStatus()
     switch self.authorizationStatus {
     case .authorized:
-      populateMedia()
+      self.fetchMediaAssets()
       break
     /*
      let asset: PHAsset = fetchResult.object(at: 3)
@@ -554,19 +580,19 @@ class PhotoLibManagement {
       PHPhotoLibrary.requestAuthorization { status in
         switch status {
         case .authorized:
-          self.populateMedia()
+          self.fetchMediaAssets()
         case .restricted, .denied:
           print("Photo Auth restricted or denied")
           self.showAuthenticationPrompt()
         case .notDetermined: break
         case .limited:
-          self.populateMedia()
+          self.fetchMediaAssets()
         @unknown default:
           print("Error")
         }
       }
     case .limited:
-      self.populateMedia()
+      self.fetchMediaAssets()
     @unknown default:
       print("Error")
     }

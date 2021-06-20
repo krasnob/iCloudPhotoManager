@@ -16,6 +16,8 @@ class ViewModel: ObservableObject {
   @Published var selectedImages: Array<Bool> = []
   @Published var lastSelectedImageIndex: Int = 0
   @Published var areAllmagesSelected: Bool = false
+  @Published var sortOrder: PhotoLibManagement.SortOrder = PhotoLibManagement.SortOrder.Descending
+  @Published var sortBy: PhotoLibManagement.Sort = PhotoLibManagement.Sort.Size
 }
 
 class ImageLoaderModel: ObservableObject {
@@ -185,15 +187,38 @@ struct SampleRow: View {
 struct ContentView: View {
   @Binding var selectedTab: Int
   @ObservedObject var viewModel: ViewModel
-  
+
   @State var scale: CGFloat = 1.0
+  @State private var sortByInternal: PhotoLibManagement.Sort
   init(selectedTab: Binding<Int>, viewModel: ViewModel) {
     self._selectedTab = selectedTab
     self.viewModel = viewModel
+    self.sortByInternal = viewModel.sortBy
     AppState.shared.contentView = self
   }
+
   var body: some View {
     VStack(alignment: .center) {
+      HStack(alignment: .center) {
+        Text("Sort By:")
+        Picker(selection: $sortByInternal, label: Text("")) {
+          Text("Size").tag(PhotoLibManagement.Sort.Size)
+                      Text("Date").tag(PhotoLibManagement.Sort.Date)
+                  }
+        .pickerStyle(SegmentedPickerStyle()).onChange(of: sortByInternal, perform: {sortByInternal in
+          self.viewModel.sortBy = sortByInternal
+          PhotoLibManagement.sharedInstance().sortMediaAssets()
+        })
+        Text("Descending").accentColor(.blue).onTapGesture {
+          self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
+          PhotoLibManagement.sharedInstance().sortMediaAssets()
+        }
+        Image(systemName: self.viewModel.sortOrder == .Descending ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
+          self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
+          PhotoLibManagement.sharedInstance().sortMediaAssets()
+        }
+
+      }
       HStack(alignment: .center) {
         Button(action: {
           self.viewModel.cellMinimumWidth -= 10
@@ -206,16 +231,12 @@ struct ContentView: View {
         }) {
           Text("+").font(.system(size: 20))
         }
-        Text("Descending")
-        Image(systemName: true ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
-          
-        }
       }
       HStack(alignment: .center) {
         Button(action: {
           //self.testText = "Hi"
           print("Here")
-          PhotoLibManagement.sharedInstance().getAllMedia(sortBy: .Size)
+          PhotoLibManagement.sharedInstance().refreshMediaAssets()
           
         }) {
           Text("Tap Here")
@@ -227,6 +248,11 @@ struct ContentView: View {
           }
         }) {
           Text("Select All")
+        }
+        Button(action: {
+          PhotoLibManagement.sharedInstance().cancelAllImageRequests()
+        }) {
+          Text("Cancel All")
         }
       }
       Button(action: {
