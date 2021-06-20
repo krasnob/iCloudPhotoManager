@@ -30,9 +30,6 @@ class DocumentPickerDelegateiOS: NSObject, UIDocumentPickerDelegate {
     self.fnDownloadSelectedMediaToUrl(url)
   }
 }
-let screenScale = UIScreen.main.scale
-#else
-let screenScale: CGFloat = 1.0
 #endif
 
 class PhotoLibManagement {
@@ -49,8 +46,12 @@ class PhotoLibManagement {
   private var authorizationStatus = PHAuthorizationStatus.notDetermined
   private var assetTuplesArray: Array<AssetTuple> = []
   private var imageCacheTuplesArray: Dictionary<String, ImageCacheTuple> = [:]
+  private let dateFormatter = DateFormatter()
   #if os(iOS)
   private var documentPickerDelegateiOS: DocumentPickerDelegateiOS?;
+  let screenScale = UIScreen.main.scale
+  #else
+  let screenScale = NSScreen.main?.backingScaleFactor ?? 1.0
   #endif
   
   // MARK: - Public Methods
@@ -79,6 +80,9 @@ class PhotoLibManagement {
       let resource = self.assetTuplesArray[index].resources[0]
       imageLoader.fileName = resource.originalFilename
       imageLoader.fileSize = "\(resource.value(forKey: "fileSize") as? Int ?? 0)"
+      if let creationDate = asset.creationDate {
+        imageLoader.fileDate = self.dateFormatter.string(from: creationDate)
+      }
       if let cachedImage = imageCacheTuple.image {
         imageLoader.uiImage = cachedImage.copy() as? UIImage
         let lastdownloadedSize = imageCacheTuple.lastDownloadedSize
@@ -359,6 +363,10 @@ class PhotoLibManagement {
   
   // MARK: - Private Methods
   
+  private init() {
+    self.dateFormatter.dateFormat = "yyyy-MM-dd' 'HH:mm:ss"
+  }
+  
   // A "Live photo" consist of image (.HEIC) and movie (.MOV) files.
   // At least, when downloading the "Live photo" from iCloud website
   // the downloaded .zip file contains 2 files (.HEIC and .MOV)
@@ -513,12 +521,20 @@ class PhotoLibManagement {
   
   public func sortMediaAssets() {
     let sortOrder = AppState.shared.contentView?.viewModel.sortOrder ?? SortOrder.Descending
+    let sortBy = AppState.shared.contentView?.viewModel.sortBy
 
     //self.cancelAllImageRequests()
 
-    self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
-      let asset1GreaterThanAsset2 = assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
-      return sortOrder == .Descending ? asset1GreaterThanAsset2 : !asset1GreaterThanAsset2
+    if sortBy == Sort.Size {
+      self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
+        let asset1SizeGreaterThanAsset2 = assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
+        return sortOrder == .Descending ? asset1SizeGreaterThanAsset2 : !asset1SizeGreaterThanAsset2
+      }
+    } else if sortBy == Sort.Date {
+      self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
+        let asset1DateGreaterThanAsset2 = assetTuple(assetTuple1, hasGreaterDateThanExistingAssetTuple: assetTuple2)
+        return sortOrder == .Descending ? asset1DateGreaterThanAsset2 : !asset1DateGreaterThanAsset2
+      }
     }
 
     AppState.shared.contentView?.viewModel.selectedImages = Array(repeating: false, count: self.assetTuplesArray.count)
@@ -527,7 +543,7 @@ class PhotoLibManagement {
   
   private func assetTuple(
     _ assetTuple: (PHAsset, resources: [PHAssetResource]),
-    hasGreaterFileSizeThanExistingAssetTuple existingAssetTuple: (PHAsset, resources: [PHAssetResource]))-> Bool {
+    hasGreaterFileSizeThanExistingAssetTuple existingAssetTuple: (PHAsset, resources: [PHAssetResource])) -> Bool {
     let assetTupleFileSize = assetTuple.resources.reduce(0 as CUnsignedLongLong, { (previousFileSize, resource: PHAssetResource) in
       let resourceFileSize = resource.value(forKey: "fileSize") as? CUnsignedLongLong ?? 0
       return previousFileSize > resourceFileSize ? previousFileSize : resourceFileSize
@@ -541,6 +557,16 @@ class PhotoLibManagement {
       }
     )
     return assetTupleFileSize > existingAssetTupleFileSize
+  }
+  
+  private func assetTuple(
+    _ assetTuple: (asset: PHAsset, resources: [PHAssetResource]),
+    hasGreaterDateThanExistingAssetTuple existingAssetTuple: (asset: PHAsset, resources: [PHAssetResource])) -> Bool {
+    if let assetDate = assetTuple.asset.creationDate,
+       let existingAssetDate = existingAssetTuple.asset.creationDate {
+      return assetDate > existingAssetDate
+    }
+    return true
   }
   
   private func fetchOptions() -> PHFetchOptions {

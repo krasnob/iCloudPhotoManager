@@ -24,6 +24,7 @@ class ImageLoaderModel: ObservableObject {
   @Published public var uiImage: UIImage?
   @Published public var fileSize: String?
   @Published public var fileName: String?
+  @Published public var fileDate: String?
   //@Published public var
 }
 
@@ -164,7 +165,7 @@ struct SampleRow: View {
           #endif
           CheckView(viewModel: viewModel, idx: idx)
         }
-        Text((imageLoaderModel.fileName ?? "NA") + " " + (imageLoaderModel.fileSize ?? "NA"))
+        Text("\(imageLoaderModel.fileName ?? "NA") \(imageLoaderModel.fileDate ?? "NA") \(imageLoaderModel.fileSize ?? "NA")")
         //Toggle("x", isOn: $status).onTapGesture {
         //  print("Here \(status)")
         //}
