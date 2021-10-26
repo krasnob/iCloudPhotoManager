@@ -505,18 +505,20 @@ class PhotoLibManagement {
   }
   
   private func fetchMediaAssets() {
-    self.assetTuplesArray.removeAll()
-    self.cancelAllImageRequests()
-    self.imageCacheTuplesArray.removeAll()
-    AppState.shared.contentView?.viewModel.selectedImages.removeAll()
-    let fetchResult: PHFetchResult = PHAsset.fetchAssets(with: fetchOptions())
-    // var assetTuplesArray: Array<(asset: PHAsset, resources: [PHAssetResource])> = []
-    fetchResult.enumerateObjects { (asset: PHAsset, index: Int, stop: UnsafeMutablePointer<ObjCBool>) in
-      let assetTuple = (asset: asset, resources: PHAssetResource.assetResources(for: asset))
-      self.assetTuplesArray.append(assetTuple)
-      self.imageCacheTuplesArray[asset.localIdentifier] = (image: nil, imageRequestId: PHInvalidImageRequestID, imageLoader: nil, lastDownloadedSize : CGSize.zero)
+    DispatchQueue.main.async {
+      self.assetTuplesArray.removeAll()
+      self.cancelAllImageRequests()
+      self.imageCacheTuplesArray.removeAll()
+      AppState.shared.contentView?.viewModel.selectedImages.removeAll()
+      let fetchResult: PHFetchResult = PHAsset.fetchAssets(with: self.fetchOptions())
+      // var assetTuplesArray: Array<(asset: PHAsset, resources: [PHAssetResource])> = []
+      fetchResult.enumerateObjects { (asset: PHAsset, index: Int, stop: UnsafeMutablePointer<ObjCBool>) in
+        let assetTuple = (asset: asset, resources: PHAssetResource.assetResources(for: asset))
+        self.assetTuplesArray.append(assetTuple)
+        self.imageCacheTuplesArray[asset.localIdentifier] = (image: nil, imageRequestId: PHInvalidImageRequestID, imageLoader: nil, lastDownloadedSize : CGSize.zero)
+      }
+      self.sortMediaAssets()
     }
-    self.sortMediaAssets()
   }
   
   public func sortMediaAssets() {
@@ -578,19 +580,26 @@ class PhotoLibManagement {
   }
   
   private func showAuthenticationPrompt() {
-    #if os(iOS)
-    let alertController = UIAlertController(title: "Please Enable Access To Photos", message: nil, preferredStyle: .alert)
-    alertController.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
-    alertController.addAction(UIAlertAction(title: "Settings", style: .default, handler: { action in
-      UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
-    }))
-    UIApplication.shared.windows.filter {$0.isKeyWindow}.first?.rootViewController?.present(alertController, animated: true, completion: nil)
-    #else
-    let alert = NSAlert()
-    alert.addButton(withTitle: "Dismiss")
-    alert.addButton(withTitle: "Open Settings")
-    let result = alert.runModal()
-    #endif
+    DispatchQueue.main.async {
+      #if os(iOS)
+      let alertController = UIAlertController(title: "Please Enable Access To Photos", message: nil, preferredStyle: .alert)
+      alertController.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+      alertController.addAction(UIAlertAction(title: "Settings", style: .default, handler: { action in
+        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
+      }))
+      UIApplication.shared.windows.filter {$0.isKeyWindow}.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+      #else
+      let alert = NSAlert()
+      alert.messageText = "Please allow an access to your photos"
+      alert.addButton(withTitle: "Dismiss")
+      alert.addButton(withTitle: "Open Settings")
+      if alert.runModal() == .alertSecondButtonReturn {
+        if let privacyPhotoUrl = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Photos") {
+          NSWorkspace.shared.open(privacyPhotoUrl);
+        }
+      }
+      #endif
+    }
   }
   
   private func requestAuthorization() {
@@ -612,7 +621,7 @@ class PhotoLibManagement {
       print("Photo Auth restricted or denied")
       self.showAuthenticationPrompt()
     case .notDetermined:
-      PHPhotoLibrary.requestAuthorization { status in
+      PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
         switch status {
         case .authorized:
           self.fetchMediaAssets()
