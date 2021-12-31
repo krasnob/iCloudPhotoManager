@@ -136,6 +136,7 @@ struct CheckView: View {
       
       #else
       Image(systemName: (self.viewModel.selectedImages.count > idx && self.viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
+        .background(Color.init(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.1))
         .onTapGesture {
           toggle()
         }.onLongPressGesture {
@@ -161,7 +162,7 @@ struct SampleRow: View {
           CellImageView(image: uiImage, width: self.width, idx: self.idx)
           #else
           Image(uiImage: uiImage).resizable()
-            .scaledToFit().animation(.easeInOut)
+            .scaledToFit()//.animation(.easeInOut)
           #endif
           CheckView(viewModel: viewModel, idx: idx)
         }
@@ -265,7 +266,7 @@ struct ContentView: View {
         Text("Download")
       }
       Button(action: {
-        PhotoLibManagement.sharedInstance().deleteMediaWithIndex(0)
+        PhotoLibManagement.sharedInstance().deleteSelectedMedias()
         
       }) {
         Text("Delete")
@@ -288,9 +289,10 @@ struct ContentView: View {
           }
         }
         .padding(.horizontal).scaleEffect(self.scale)
-        .gesture(MagnificationGesture()
+        .gesture(MagnificationGesture(minimumScaleDelta: 0.1)
                   .onChanged { value in
-                    self.scale = value.magnitude
+                    self.scale = value
+                    print("scale: \(self.scale)")
                   }.onEnded {value in
                     self.scale = 1.0
                     self.viewModel.cellMinimumWidth = self.viewModel.cellMinimumWidth * value.magnitude

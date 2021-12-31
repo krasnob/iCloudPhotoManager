@@ -81,7 +81,7 @@ class PhotoLibManagement {
       imageLoader.fileName = resource.originalFilename
       imageLoader.fileSize = "\(resource.value(forKey: "fileSize") as? Int ?? 0)"
       if let creationDate = asset.creationDate {
-        imageLoader.fileDate = self.dateFormatter.string(from: creationDate)
+        imageLoader.fileDate = self.dateStringFrom(creationDate) // self.dateFormatter.string(from: creationDate)
       }
       if let cachedImage = imageCacheTuple.image {
         imageLoader.uiImage = cachedImage.copy() as? UIImage
@@ -102,24 +102,19 @@ class PhotoLibManagement {
       PHImageManager.default().cancelImageRequest(imageCacheTuple.imageRequestId)
     }
     self.imageCacheTuplesArray[asset.localIdentifier]?.lastDownloadedSize = adjustedTargetSize
-    DispatchQueue.global(qos: .background).async {
+    DispatchQueue.global(qos: .userInteractive).async {
       let requestOptions = PHImageRequestOptions()
       requestOptions.isNetworkAccessAllowed = true
       requestOptions.version = PHImageRequestOptionsVersion.original
-      requestOptions.deliveryMode = .highQualityFormat
+      requestOptions.deliveryMode = .opportunistic
+      requestOptions.version = .current
       print("index: \(index) before requestImage")
       let imageRequestId = PHImageManager.default().requestImage(
         for: asset, targetSize: adjustedTargetSize, contentMode: .default, options: requestOptions, resultHandler:
-          { (image: UIImage?, info: [AnyHashable : Any]?) in
-            print("index: \(index) background: \(String(describing: image))")
-            DispatchQueue.main.async {
-              self.imageCacheTuplesArray[asset.localIdentifier]?.imageRequestId = PHInvalidImageRequestID
-              if let requestedImage = image {
-                self.imageCacheTuplesArray[asset.localIdentifier]?.image = requestedImage
-                self.imageCacheTuplesArray[asset.localIdentifier]?.imageLoader?.uiImage = requestedImage
-              }
+            { (image: UIImage?, info: [AnyHashable : Any]?) in
+              print("index: \(index) background: \(String(describing: image))")
+              self.updateImageCacheForAsset(asset: asset, withImage: image)
             }
-          }
       )
       DispatchQueue.main.async {
         self.imageCacheTuplesArray[asset.localIdentifier]!.imageRequestId = imageRequestId
@@ -200,6 +195,16 @@ class PhotoLibManagement {
     return "\(dateTimeString)_\(fileNameOrFolderSuffix)"
   }
   
+  private func updateImageCacheForAsset(asset: PHAsset, withImage image: UIImage?) {
+    DispatchQueue.main.async {
+      self.imageCacheTuplesArray[asset.localIdentifier]?.imageRequestId = PHInvalidImageRequestID
+      if let requestedImage = image {
+        self.imageCacheTuplesArray[asset.localIdentifier]?.image = requestedImage
+        self.imageCacheTuplesArray[asset.localIdentifier]?.imageLoader?.uiImage = requestedImage
+      }
+    }
+  }
+
   private func dateStringFrom(_ date: Date?) -> String {
     guard let date = date else {
       return ""
@@ -348,6 +353,16 @@ class PhotoLibManagement {
        }*/
       saveAssetResource(resource: resources[0], inDirectory: NSURL(string: "file:////Users/sasha/Downloads/ss/")!, buffer: nil, maybeError: nil)
       //self.downloadVideo(asset: assetToDownload, resource: resources[0])
+    }
+  }
+  
+  public func deleteSelectedMedias() {
+    if let viewModel = AppState.shared.contentView?.viewModel {
+      for i in 0 ..< viewModel.selectedImages.count {
+        if viewModel.selectedImages[i] {
+          self.deleteMediaWithIndex(i)
+        }
+      }
     }
   }
   
