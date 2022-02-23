@@ -13,6 +13,7 @@ typealias UIImage = NSImage
 import UIKit
 #endif
 import Photos
+import SwiftUI
 
 typealias AssetTuple = (asset: PHAsset, resources: [PHAssetResource])
 typealias ImageCacheTuple = (image: UIImage?, imageRequestId: PHImageRequestID, imageLoader: ImageLoaderModel?, lastDownloadedSize: CGSize)
@@ -47,12 +48,12 @@ class PhotoLibManagement {
   private var assetTuplesArray: Array<AssetTuple> = []
   private var imageCacheTuplesArray: Dictionary<String, ImageCacheTuple> = [:]
   private let dateFormatter = DateFormatter()
-  #if os(iOS)
+#if os(iOS)
   private var documentPickerDelegateiOS: DocumentPickerDelegateiOS?;
   let screenScale = UIScreen.main.scale
-  #else
+#else
   let screenScale = NSScreen.main?.backingScaleFactor ?? 1.0
-  #endif
+#endif
   
   // MARK: - Public Methods
   
@@ -122,7 +123,7 @@ class PhotoLibManagement {
     }
   }
   
-  public func saveAssetWithIndex(_ index: Int, toUrl url: URL, withCompletionhandler completionHandler: @escaping (Error?) -> Void) {
+  public func saveAssetWithIndex(_ index: Int, toUrl url: URL, withProgresshandler progresshandler: @escaping (Double) -> Void, withCompletionhandler completionHandler: @escaping (Error?) -> Void) {
     if (index >= self.mediaCount() || index < 0) {
       completionHandler(NSError(domain:"", code:2, userInfo:[ NSLocalizedDescriptionKey: "No asset with the index \(index) found in the photo library"]))
       return
@@ -144,6 +145,9 @@ class PhotoLibManagement {
     let assetRequestOptions = PHAssetResourceRequestOptions()
     assetRequestOptions.isNetworkAccessAllowed = true
     var filesCountToSave = resources.count
+    if filesCountToSave > 0 {
+      progresshandler(0.1)
+    }
     for resource in resources {
       var fileNameUrl = url
       if saveToFolder {
@@ -161,8 +165,8 @@ class PhotoLibManagement {
           continue
         }
       }
-
-      self.saveAssetResource(resource, fileNameUrl: fileNameUrl) { (error) in
+      
+      self.saveAssetResource(resource, fileNameUrl: fileNameUrl, progressHandler: progresshandler) { (error) in
         if let error = error {
           print("Error: '\(error)' saving resource to filepath: \(fileNameUrl)")
         } else {
@@ -204,7 +208,7 @@ class PhotoLibManagement {
       }
     }
   }
-
+  
   private func dateStringFrom(_ date: Date?) -> String {
     guard let date = date else {
       return ""
@@ -231,10 +235,19 @@ class PhotoLibManagement {
         saveAssetWithIndex(
           i,
           toUrl: url.appendingPathComponent(fileOrFolderName),
+          withProgresshandler: { (progress: Double) in
+            withAnimation { viewModel.currentSaveProgress = progress }
+          },
           withCompletionhandler: { (error: Error?) in
             savedFilesCount -= 1
             if savedFilesCount <= 0 {
               url.stopAccessingSecurityScopedResource()
+              DispatchQueue.main.async {
+                withAnimation { viewModel.currentSaveProgress = 1.0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                  withAnimation { viewModel.currentSaveProgress = 0 }
+                }
+              }
             }
           }
         )
@@ -243,7 +256,7 @@ class PhotoLibManagement {
   }
   
   public func downloadSelectedMediaToUserSelectedFolder() {
-    #if !os(iOS)
+#if !os(iOS)
     let openPanel = NSOpenPanel()
     openPanel.canCreateDirectories = true
     openPanel.level = .modalPanel
@@ -256,21 +269,16 @@ class PhotoLibManagement {
         self.downloadSelectedMediaToUrl(openPanel.url!)
       }
     }
-    #else
+#else
     // let documentPicker = UIDocumentPickerViewController(forExporting: [URL(fileURLWithPath: "/")], asCopy: true)
     let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
     self.documentPickerDelegateiOS = DocumentPickerDelegateiOS(fnDownloadSelectedMediaToUrl: self.downloadSelectedMediaToUrl)
     documentPicker.delegate = self.documentPickerDelegateiOS
     documentPicker.allowsMultipleSelection = false
     
-    
-    // Set the initial directory.
-    documentPicker.directoryURL = URL(fileURLWithPath: "/")
-    
-    
     // Present the document picker.
     UIApplication.shared.windows.filter {$0.isKeyWindow}.first?.rootViewController?.present(documentPicker, animated: true, completion: nil)
-    #endif
+#endif
   }
   
   public func downloadMedia() {
@@ -437,9 +445,11 @@ class PhotoLibManagement {
   private func saveAssetResource(
     _ resource: PHAssetResource,
     fileNameUrl: URL,
+    progressHandler: @escaping (Double) -> Void,
     completionHandler: @escaping (Error?) -> Void
   ) -> Void {
     let assetRequestOptions = PHAssetResourceRequestOptions()
+    assetRequestOptions.progressHandler = progressHandler
     //assetRequestOptions.version =
     assetRequestOptions.isNetworkAccessAllowed = true
     PHAssetResourceManager.default().writeData(for: resource, toFile: fileNameUrl, options: assetRequestOptions) { (error) in
@@ -504,19 +514,19 @@ class PhotoLibManagement {
      })*/
     PHImageManager.default().requestImageDataAndOrientation(
       for: asset,
-      options: requestOptions,
-      resultHandler: { (data: Data?, dataUTI: String?, orientation: CGImagePropertyOrientation, info: [AnyHashable : Any]?) in
-        print("Here")
-        if let imageData = data {
-          let ciImage = CIImage(data: imageData);
-          do {
-            // try FileManager.default.createDirectory(atPath: "/Users/sasha/Downloads/ss", withIntermediateDirectories: true, attributes: nil)
-            try imageData.write(to: URL(string: "file:////Users/sasha/Downloads/ss/\(resource.originalFilename)")!, options: Data.WritingOptions.atomic)
-          } catch {
-            print("Unexpected error: \(error).")
-          }
-        }
-      })
+         options: requestOptions,
+         resultHandler: { (data: Data?, dataUTI: String?, orientation: CGImagePropertyOrientation, info: [AnyHashable : Any]?) in
+           print("Here")
+           if let imageData = data {
+             let ciImage = CIImage(data: imageData);
+             do {
+               // try FileManager.default.createDirectory(atPath: "/Users/sasha/Downloads/ss", withIntermediateDirectories: true, attributes: nil)
+               try imageData.write(to: URL(string: "file:////Users/sasha/Downloads/ss/\(resource.originalFilename)")!, options: Data.WritingOptions.atomic)
+             } catch {
+               print("Unexpected error: \(error).")
+             }
+           }
+         })
   }
   
   private func fetchMediaAssets() {
@@ -539,9 +549,9 @@ class PhotoLibManagement {
   public func sortMediaAssets() {
     let sortOrder = AppState.shared.contentView?.viewModel.sortOrder ?? SortOrder.Descending
     let sortBy = AppState.shared.contentView?.viewModel.sortBy
-
+    
     //self.cancelAllImageRequests()
-
+    
     if sortBy == Sort.Size {
       self.assetTuplesArray = self.assetTuplesArray.sorted { (assetTuple1: AssetTuple, assetTuple2: AssetTuple) -> Bool in
         let asset1SizeGreaterThanAsset2 = assetTuple(assetTuple1, hasGreaterFileSizeThanExistingAssetTuple: assetTuple2)
@@ -553,7 +563,7 @@ class PhotoLibManagement {
         return sortOrder == .Descending ? asset1DateGreaterThanAsset2 : !asset1DateGreaterThanAsset2
       }
     }
-
+    
     AppState.shared.contentView?.viewModel.selectedImages = Array(repeating: false, count: self.assetTuplesArray.count)
     AppState.shared.contentView?.viewModel.testText = "Done"
   }
@@ -561,30 +571,30 @@ class PhotoLibManagement {
   private func assetTuple(
     _ assetTuple: (PHAsset, resources: [PHAssetResource]),
     hasGreaterFileSizeThanExistingAssetTuple existingAssetTuple: (PHAsset, resources: [PHAssetResource])) -> Bool {
-    let assetTupleFileSize = assetTuple.resources.reduce(0 as CUnsignedLongLong, { (previousFileSize, resource: PHAssetResource) in
-      let resourceFileSize = resource.value(forKey: "fileSize") as? CUnsignedLongLong ?? 0
-      return previousFileSize > resourceFileSize ? previousFileSize : resourceFileSize
-    }
-    )
-    let existingAssetTupleFileSize = existingAssetTuple.resources.reduce(
-      0 as CUnsignedLongLong, {
-        (previousFileSize, resource: PHAssetResource) in
+      let assetTupleFileSize = assetTuple.resources.reduce(0 as CUnsignedLongLong, { (previousFileSize, resource: PHAssetResource) in
         let resourceFileSize = resource.value(forKey: "fileSize") as? CUnsignedLongLong ?? 0
         return previousFileSize > resourceFileSize ? previousFileSize : resourceFileSize
       }
-    )
-    return assetTupleFileSize > existingAssetTupleFileSize
-  }
+      )
+      let existingAssetTupleFileSize = existingAssetTuple.resources.reduce(
+        0 as CUnsignedLongLong, {
+          (previousFileSize, resource: PHAssetResource) in
+          let resourceFileSize = resource.value(forKey: "fileSize") as? CUnsignedLongLong ?? 0
+          return previousFileSize > resourceFileSize ? previousFileSize : resourceFileSize
+        }
+      )
+      return assetTupleFileSize > existingAssetTupleFileSize
+    }
   
   private func assetTuple(
     _ assetTuple: (asset: PHAsset, resources: [PHAssetResource]),
     hasGreaterDateThanExistingAssetTuple existingAssetTuple: (asset: PHAsset, resources: [PHAssetResource])) -> Bool {
-    if let assetDate = assetTuple.asset.creationDate,
-       let existingAssetDate = existingAssetTuple.asset.creationDate {
-      return assetDate > existingAssetDate
+      if let assetDate = assetTuple.asset.creationDate,
+         let existingAssetDate = existingAssetTuple.asset.creationDate {
+        return assetDate > existingAssetDate
+      }
+      return true
     }
-    return true
-  }
   
   private func fetchOptions() -> PHFetchOptions {
     // 1
@@ -596,14 +606,14 @@ class PhotoLibManagement {
   
   private func showAuthenticationPrompt() {
     DispatchQueue.main.async {
-      #if os(iOS)
+#if os(iOS)
       let alertController = UIAlertController(title: "Please Enable Access To Photos", message: nil, preferredStyle: .alert)
       alertController.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
       alertController.addAction(UIAlertAction(title: "Settings", style: .default, handler: { action in
         UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
       }))
       UIApplication.shared.windows.filter {$0.isKeyWindow}.first?.rootViewController?.present(alertController, animated: true, completion: nil)
-      #else
+#else
       let alert = NSAlert()
       alert.messageText = "Please allow an access to your photos"
       alert.addButton(withTitle: "Dismiss")
@@ -613,7 +623,7 @@ class PhotoLibManagement {
           NSWorkspace.shared.open(privacyPhotoUrl);
         }
       }
-      #endif
+#endif
     }
   }
   
@@ -623,15 +633,15 @@ class PhotoLibManagement {
     case .authorized:
       self.fetchMediaAssets()
       break
-    /*
-     let asset: PHAsset = fetchResult.object(at: 3)
-     let resource = PHAssetResource.assetResources(for: asset)
-     PHPhotoLibrary.shared().performChanges({
-     PHAssetChangeRequest.deleteAssets([asset] as NSFastEnumeration)
-     }, completionHandler: { success, error in
-     if !success { print("error deleting asset: \(error)") }
-     })
-     print("Here 3")*/
+      /*
+       let asset: PHAsset = fetchResult.object(at: 3)
+       let resource = PHAssetResource.assetResources(for: asset)
+       PHPhotoLibrary.shared().performChanges({
+       PHAssetChangeRequest.deleteAssets([asset] as NSFastEnumeration)
+       }, completionHandler: { success, error in
+       if !success { print("error deleting asset: \(error)") }
+       })
+       print("Here 3")*/
     case .restricted, .denied:
       print("Photo Auth restricted or denied")
       self.showAuthenticationPrompt()

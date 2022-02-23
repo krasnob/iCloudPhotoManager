@@ -18,6 +18,7 @@ class ViewModel: ObservableObject {
   @Published var areAllmagesSelected: Bool = false
   @Published var sortOrder: PhotoLibManagement.SortOrder = PhotoLibManagement.SortOrder.Descending
   @Published var sortBy: PhotoLibManagement.Sort = PhotoLibManagement.Sort.Size
+  @Published var currentSaveProgress: Double = 0
 }
 
 class ImageLoaderModel: ObservableObject {
@@ -190,6 +191,8 @@ struct ContentView: View {
   @Binding var selectedTab: Int
   @ObservedObject var viewModel: ViewModel
   
+  @State private var isShowingControls = true
+  @State private var isShowingProgressView = true
   @State var scale: CGFloat = 1.0
   @State private var sortByInternal: PhotoLibManagement.Sort
   init(selectedTab: Binding<Int>, viewModel: ViewModel) {
@@ -201,85 +204,91 @@ struct ContentView: View {
   
   var body: some View {
     VStack(alignment: .center) {
-      VStack(alignment: .center) {
-        HStack(alignment: .center) {
-          Text("Sort By:")
-          Picker(selection: $sortByInternal, label: Text("")) {
-            Text("Size").tag(PhotoLibManagement.Sort.Size)
-            Text("Date").tag(PhotoLibManagement.Sort.Date)
+      if isShowingControls {
+        // Controls
+        VStack(alignment: .center) {
+          HStack(alignment: .center) {
+            Text("Sort By:")
+            Picker(selection: $sortByInternal, label: Text("")) {
+              Text("Size").tag(PhotoLibManagement.Sort.Size)
+              Text("Date").tag(PhotoLibManagement.Sort.Date)
+            }
+            .pickerStyle(SegmentedPickerStyle()).onChange(of: sortByInternal, perform: {sortByInternal in
+              self.viewModel.sortBy = sortByInternal
+              PhotoLibManagement.sharedInstance().sortMediaAssets()
+            })
+            Text("Descending").accentColor(.blue).onTapGesture {
+              self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
+              PhotoLibManagement.sharedInstance().sortMediaAssets()
+            }
+            Image(systemName: self.viewModel.sortOrder == .Descending ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
+              self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
+              PhotoLibManagement.sharedInstance().sortMediaAssets()
+            }
+            
           }
-          .pickerStyle(SegmentedPickerStyle()).onChange(of: sortByInternal, perform: {sortByInternal in
-            self.viewModel.sortBy = sortByInternal
-            PhotoLibManagement.sharedInstance().sortMediaAssets()
-          })
-          Text("Descending").accentColor(.blue).onTapGesture {
-            self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
-            PhotoLibManagement.sharedInstance().sortMediaAssets()
+          if self.viewModel.currentSaveProgress > 0 {
+            ProgressView(value: self.viewModel.currentSaveProgress)
           }
-          Image(systemName: self.viewModel.sortOrder == .Descending ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
-            self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
-            PhotoLibManagement.sharedInstance().sortMediaAssets()
+          HStack(alignment: .center) {
+            Button(action: {
+              self.viewModel.cellMinimumWidth -= 10
+            }) {
+              Text("-")
+            }
+            
+            Button(action: {
+              self.viewModel.cellMinimumWidth += 10
+            }) {
+              Text("+").font(.system(size: 20))
+            }
           }
-          
-        }
-        HStack(alignment: .center) {
-          Button(action: {
-            self.viewModel.cellMinimumWidth -= 10
-          }) {
-            Text("-")
+          HStack(alignment: .center) {
+            Button(action: {
+              //self.testText = "Hi"
+              print("Here")
+              PhotoLibManagement.sharedInstance().refreshMediaAssets()
+              
+            }) {
+              Text("Tap Here")
+            }
+            Button(action: {
+              self.viewModel.areAllmagesSelected = !self.viewModel.areAllmagesSelected
+              for i in 0 ..< (AppState.shared.contentView?.viewModel.selectedImages.count ?? 0) {
+                self.viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
+              }
+            }) {
+              Text("Select All")
+            }
+            Button(action: {
+              PhotoLibManagement.sharedInstance().cancelAllImageRequests()
+            }) {
+              Text("Cancel All")
+            }
           }
-          
-          Button(action: {
-            self.viewModel.cellMinimumWidth += 10
-          }) {
-            Text("+").font(.system(size: 20))
-          }
-        }
-        HStack(alignment: .center) {
           Button(action: {
             //self.testText = "Hi"
             print("Here")
-            PhotoLibManagement.sharedInstance().refreshMediaAssets()
+            PhotoLibManagement.sharedInstance().downloadSelectedMediaToUserSelectedFolder()
             
           }) {
-            Text("Tap Here")
+            Text("Download")
           }
           Button(action: {
-            self.viewModel.areAllmagesSelected = !self.viewModel.areAllmagesSelected
-            for i in 0 ..< (AppState.shared.contentView?.viewModel.selectedImages.count ?? 0) {
-              self.viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
-            }
+            PhotoLibManagement.sharedInstance().deleteSelectedMedias()
+            
           }) {
-            Text("Select All")
+            Text("Delete")
           }
+          Text(self.viewModel.testText)
+            .frame(maxWidth: .infinity, maxHeight: 100)
           Button(action: {
-            PhotoLibManagement.sharedInstance().cancelAllImageRequests()
+            self.selectedTab = 1
+            //AppState.shared.tabBarAppearance.barTintColor = UIColor.green
+            //AppState.shared.tabBar.isHidden = false
           }) {
-            Text("Cancel All")
+            Text("Switch")
           }
-        }
-        Button(action: {
-          //self.testText = "Hi"
-          print("Here")
-          PhotoLibManagement.sharedInstance().downloadSelectedMediaToUserSelectedFolder()
-          
-        }) {
-          Text("Download")
-        }
-        Button(action: {
-          PhotoLibManagement.sharedInstance().deleteSelectedMedias()
-          
-        }) {
-          Text("Delete")
-        }
-        Text(self.viewModel.testText)
-          .frame(maxWidth: .infinity, maxHeight: 100)
-        Button(action: {
-          self.selectedTab = 1
-          //AppState.shared.tabBarAppearance.barTintColor = UIColor.green
-          //AppState.shared.tabBar.isHidden = false
-        }) {
-          Text("Switch")
         }
       }
       
@@ -300,7 +309,15 @@ struct ContentView: View {
           self.scale = 1.0
           self.viewModel.cellMinimumWidth = self.viewModel.cellMinimumWidth * value.magnitude
         })
-      }
+      }.simultaneousGesture(
+        DragGesture().onChanged({
+          let isScrollDown = 0 < $0.translation.height
+          if self.isShowingControls != isScrollDown {
+            withAnimation {
+              self.isShowingControls = isScrollDown
+            }
+          }
+        }))
       /*ForEach((1...10).reversed(), id: \.self) {
        Text("\($0)…")
        }*/
