@@ -121,7 +121,7 @@ struct CheckView: View {
   var body: some View {
     
     HStack{
-      #if os(macOS)
+#if os(macOS)
       Image(systemName: (self.viewModel.selectedImages.count > idx && self.viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
         .gesture(TapGesture().modifiers(.shift).onEnded {
           markRangeSelected(clickedIndex: self.idx)
@@ -134,7 +134,7 @@ struct CheckView: View {
           toggle()
         }
       
-      #else
+#else
       Image(systemName: (self.viewModel.selectedImages.count > idx && self.viewModel.selectedImages[idx]) ? "checkmark.square": "square").font(.system(size: 20))
         .background(Color.init(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.1))
         .onTapGesture {
@@ -142,7 +142,7 @@ struct CheckView: View {
         }.onLongPressGesture {
           markRangeSelected(clickedIndex: self.idx)
         }
-      #endif
+#endif
     }
   }
 }
@@ -158,12 +158,12 @@ struct SampleRow: View {
     VStack(alignment: .center) {
       if let uiImage = imageLoaderModel.uiImage {
         ZStack(alignment: .topTrailing) {
-          #if os(macOS)
+#if os(macOS)
           CellImageView(image: uiImage, width: self.width, idx: self.idx)
-          #else
+#else
           Image(uiImage: uiImage).resizable()
             .scaledToFit()//.animation(.easeInOut)
-          #endif
+#endif
           CheckView(viewModel: viewModel, idx: idx)
         }
         Text("\(imageLoaderModel.fileName ?? "NA") \(imageLoaderModel.fileDate ?? "NA") \(imageLoaderModel.fileSize ?? "NA")")
@@ -189,7 +189,7 @@ struct SampleRow: View {
 struct ContentView: View {
   @Binding var selectedTab: Int
   @ObservedObject var viewModel: ViewModel
-
+  
   @State var scale: CGFloat = 1.0
   @State private var sortByInternal: PhotoLibManagement.Sort
   init(selectedTab: Binding<Int>, viewModel: ViewModel) {
@@ -198,88 +198,91 @@ struct ContentView: View {
     self.sortByInternal = viewModel.sortBy
     AppState.shared.contentView = self
   }
-
+  
   var body: some View {
     VStack(alignment: .center) {
-      HStack(alignment: .center) {
-        Text("Sort By:")
-        Picker(selection: $sortByInternal, label: Text("")) {
-          Text("Size").tag(PhotoLibManagement.Sort.Size)
-                      Text("Date").tag(PhotoLibManagement.Sort.Date)
-                  }
-        .pickerStyle(SegmentedPickerStyle()).onChange(of: sortByInternal, perform: {sortByInternal in
-          self.viewModel.sortBy = sortByInternal
-          PhotoLibManagement.sharedInstance().sortMediaAssets()
-        })
-        Text("Descending").accentColor(.blue).onTapGesture {
-          self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
-          PhotoLibManagement.sharedInstance().sortMediaAssets()
+      VStack(alignment: .center) {
+        HStack(alignment: .center) {
+          Text("Sort By:")
+          Picker(selection: $sortByInternal, label: Text("")) {
+            Text("Size").tag(PhotoLibManagement.Sort.Size)
+            Text("Date").tag(PhotoLibManagement.Sort.Date)
+          }
+          .pickerStyle(SegmentedPickerStyle()).onChange(of: sortByInternal, perform: {sortByInternal in
+            self.viewModel.sortBy = sortByInternal
+            PhotoLibManagement.sharedInstance().sortMediaAssets()
+          })
+          Text("Descending").accentColor(.blue).onTapGesture {
+            self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
+            PhotoLibManagement.sharedInstance().sortMediaAssets()
+          }
+          Image(systemName: self.viewModel.sortOrder == .Descending ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
+            self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
+            PhotoLibManagement.sharedInstance().sortMediaAssets()
+          }
+          
         }
-        Image(systemName: self.viewModel.sortOrder == .Descending ? "checkmark.square": "square").font(.system(size: 20)).onTapGesture {
-          self.viewModel.sortOrder = self.viewModel.sortOrder == .Descending ? .Ascendig : .Descending
-          PhotoLibManagement.sharedInstance().sortMediaAssets()
+        HStack(alignment: .center) {
+          Button(action: {
+            self.viewModel.cellMinimumWidth -= 10
+          }) {
+            Text("-")
+          }
+          
+          Button(action: {
+            self.viewModel.cellMinimumWidth += 10
+          }) {
+            Text("+").font(.system(size: 20))
+          }
         }
-
-      }
-      HStack(alignment: .center) {
-        Button(action: {
-          self.viewModel.cellMinimumWidth -= 10
-        }) {
-          Text("-")
+        HStack(alignment: .center) {
+          Button(action: {
+            //self.testText = "Hi"
+            print("Here")
+            PhotoLibManagement.sharedInstance().refreshMediaAssets()
+            
+          }) {
+            Text("Tap Here")
+          }
+          Button(action: {
+            self.viewModel.areAllmagesSelected = !self.viewModel.areAllmagesSelected
+            for i in 0 ..< (AppState.shared.contentView?.viewModel.selectedImages.count ?? 0) {
+              self.viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
+            }
+          }) {
+            Text("Select All")
+          }
+          Button(action: {
+            PhotoLibManagement.sharedInstance().cancelAllImageRequests()
+          }) {
+            Text("Cancel All")
+          }
         }
-        
-        Button(action: {
-          self.viewModel.cellMinimumWidth += 10
-        }) {
-          Text("+").font(.system(size: 20))
-        }
-      }
-      HStack(alignment: .center) {
         Button(action: {
           //self.testText = "Hi"
           print("Here")
-          PhotoLibManagement.sharedInstance().refreshMediaAssets()
+          PhotoLibManagement.sharedInstance().downloadSelectedMediaToUserSelectedFolder()
           
         }) {
-          Text("Tap Here")
+          Text("Download")
         }
         Button(action: {
-          self.viewModel.areAllmagesSelected = !self.viewModel.areAllmagesSelected
-          for i in 0 ..< (AppState.shared.contentView?.viewModel.selectedImages.count ?? 0) {
-            self.viewModel.selectedImages[i] = self.viewModel.areAllmagesSelected
-          }
+          PhotoLibManagement.sharedInstance().deleteSelectedMedias()
+          
         }) {
-          Text("Select All")
+          Text("Delete")
         }
+        Text(self.viewModel.testText)
+          .frame(maxWidth: .infinity, maxHeight: 100)
         Button(action: {
-          PhotoLibManagement.sharedInstance().cancelAllImageRequests()
+          self.selectedTab = 1
+          //AppState.shared.tabBarAppearance.barTintColor = UIColor.green
+          //AppState.shared.tabBar.isHidden = false
         }) {
-          Text("Cancel All")
+          Text("Switch")
         }
       }
-      Button(action: {
-        //self.testText = "Hi"
-        print("Here")
-        PhotoLibManagement.sharedInstance().downloadSelectedMediaToUserSelectedFolder()
-        
-      }) {
-        Text("Download")
-      }
-      Button(action: {
-        PhotoLibManagement.sharedInstance().deleteSelectedMedias()
-        
-      }) {
-        Text("Delete")
-      }
-      Text(self.viewModel.testText)
-        .frame(maxWidth: .infinity, maxHeight: 100)
-      Button(action: {
-        self.selectedTab = 1
-        //AppState.shared.tabBarAppearance.barTintColor = UIColor.green
-        //AppState.shared.tabBar.isHidden = false
-      }) {
-        Text("Switch")
-      }
+      
       ScrollView {
         LazyVGrid(columns: [
           GridItem(.adaptive(minimum: viewModel.cellMinimumWidth))
@@ -288,15 +291,15 @@ struct ContentView: View {
             SampleRow(idx: idx, parent: self, width: self.viewModel.cellMinimumWidth, viewModel: self.viewModel)
           }
         }
-        .padding(.horizontal).scaleEffect(self.scale)
+        .padding(.horizontal).scaleEffect(self.scale, anchor: .zero)
         .gesture(MagnificationGesture(minimumScaleDelta: 0.1)
                   .onChanged { value in
-                    self.scale = value
-                    print("scale: \(self.scale)")
-                  }.onEnded {value in
-                    self.scale = 1.0
-                    self.viewModel.cellMinimumWidth = self.viewModel.cellMinimumWidth * value.magnitude
-                  })
+          self.scale = value
+          print("scale: \(self.scale)")
+        }.onEnded {value in
+          self.scale = 1.0
+          self.viewModel.cellMinimumWidth = self.viewModel.cellMinimumWidth * value.magnitude
+        })
       }
       /*ForEach((1...10).reversed(), id: \.self) {
        Text("\($0)…")
