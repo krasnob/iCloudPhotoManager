@@ -38,7 +38,9 @@ class DraggableImageView: NSImageView, NSDraggingSource, NSFilePromiseProviderDe
   }
   
   func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
-    PhotoLibManagement.sharedInstance().saveAssetWithIndex(self.idx ?? -1, toUrl: url, withCompletionhandler: completionHandler)
+    PhotoLibManagement.sharedInstance().saveAssetWithIndex(self.idx ?? -1, toUrl: url, withProgresshandler: {progress in
+      print("Progress: " + String(progress))
+    }, withCompletionhandler: completionHandler)
     return
   }
   
@@ -246,7 +248,7 @@ struct ContentView: View {
           HStack(alignment: .center) {
             Button(action: {
               //self.testText = "Hi"
-              print("Here")
+              print("Here refreshMediaAssets")
               PhotoLibManagement.sharedInstance().refreshMediaAssets()
               
             }) {
